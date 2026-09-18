@@ -9,39 +9,54 @@ class AdminUserCreator
   end
 
   def call
-    @output.puts "Creating new admin user..."
-    @output.puts ""
+    announce
+    report_created(User.create!(**admin_attributes))
+  rescue ActiveRecord::RecordInvalid => error
+    report_invalid(error.record)
+  end
 
+  private
+
+  def announce
+    @output.puts "Creating new admin user..."
+    blank_line
+  end
+
+  def confirmed_password
+    password = ask_hidden("Password: ")
+    return password if password == ask_hidden("Confirm password: ")
+
+    @output.puts "Error: Passwords don't match"
+    exit 1
+  end
+
+  def admin_attributes
     email = ask("Email address: ")
     name = ask("Name: ")
-    password = ask_hidden("Password: ")
-    password_confirmation = ask_hidden("Confirm password: ")
+    password = confirmed_password
 
-    unless password == password_confirmation
-      @output.puts "Error: Passwords don't match"
-      exit 1
-    end
-
-    user = User.create!(
+    {
       email_address: email,
       password: password,
       password_confirmation: password,
       name: name,
       role: :admin,
       status: :active
-    )
-
-    @output.puts ""
-    @output.puts "Successfully created admin user: #{user.name}"
-    @output.puts "Email: #{user.email_address}"
-  rescue ActiveRecord::RecordInvalid => e
-    @output.puts ""
-    @output.puts "Failed to create user:"
-    e.record.errors.full_messages.each { |error| @output.puts "  - #{error}" }
-    exit 1
+    }
   end
 
-  private
+  def report_created(user)
+    blank_line
+    @output.puts "Successfully created admin user: #{user.name}"
+    @output.puts "Email: #{user.email_address}"
+  end
+
+  def report_invalid(record)
+    blank_line
+    @output.puts "Failed to create user:"
+    record.errors.full_messages.each { |message| @output.puts "  - #{message}" }
+    exit 1
+  end
 
   def ask(prompt)
     @output.print prompt
@@ -51,7 +66,11 @@ class AdminUserCreator
   def ask_hidden(prompt)
     @output.print prompt
     answer = @input.noecho(&:gets).chomp
-    @output.puts ""
+    blank_line
     answer
+  end
+
+  def blank_line
+    @output.puts ""
   end
 end

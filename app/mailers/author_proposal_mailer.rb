@@ -21,13 +21,11 @@ class AuthorProposalMailer < ApplicationMailer
   # @param author_proposal [AuthorProposal] the submitted proposal
   # @return [Mail::Message] the email to be delivered
   def submission_confirmation(author_proposal)
-    @proposal = author_proposal
-    # Eager load author to avoid strict loading violation
-    @author = author_proposal.author_id.present? ? Author.find(author_proposal.author_id) : nil
+    assign_proposal(author_proposal)
 
     mail(
-      to: @proposal.submitter_email,
-      subject: "Author Proposal Received - ID ##{@proposal.id}"
+      to: author_proposal.submitter_email,
+      subject: "Author Proposal Received - ID ##{author_proposal.id}"
     )
   end
 
@@ -41,13 +39,15 @@ class AuthorProposalMailer < ApplicationMailer
   # @param author_proposal [AuthorProposal] the approved proposal
   # @return [Mail::Message] the email to be delivered
   def approval_notification(author_proposal)
-    @proposal = author_proposal
     # Approval always assigns an author; load it explicitly to avoid strict loading violation
-    @author = Author.find(author_proposal.author_id)
+    author = Author.find(author_proposal.author_id)
+
+    @proposal = author_proposal
+    @author = author
 
     mail(
-      to: @proposal.submitter_email,
-      subject: "Author Proposal Approved - #{@author.name}"
+      to: author_proposal.submitter_email,
+      subject: "Author Proposal Approved - #{author.name}"
     )
   end
 
@@ -61,14 +61,23 @@ class AuthorProposalMailer < ApplicationMailer
   # @param author_proposal [AuthorProposal] the rejected proposal
   # @return [Mail::Message] the email to be delivered
   def rejection_notification(author_proposal)
-    @proposal = author_proposal
-    # Eager load author to avoid strict loading violation
-    @author = author_proposal.author_id.present? ? Author.find(author_proposal.author_id) : nil
+    assign_proposal(author_proposal)
     @admin_comment = author_proposal.admin_comment
 
     mail(
-      to: @proposal.submitter_email,
-      subject: "Author Proposal Feedback - ID ##{@proposal.id}"
+      to: author_proposal.submitter_email,
+      subject: "Author Proposal Feedback - ID ##{author_proposal.id}"
     )
+  end
+
+  private
+
+  # Exposes the proposal and its author to the views. The author is loaded by id
+  # because the association is strict loading, and a pending proposal has none.
+  def assign_proposal(author_proposal)
+    author_id = author_proposal.author_id
+
+    @proposal = author_proposal
+    @author = author_id.present? ? Author.find(author_id) : nil
   end
 end

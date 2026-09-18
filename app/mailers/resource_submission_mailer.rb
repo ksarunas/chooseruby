@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Mailer for resource submissions: notifies the team of new submissions and
+# tells submitters when their entry is received, approved or rejected.
 class ResourceSubmissionMailer < ApplicationMailer
   default to: -> { ENV.fetch("RESOURCE_SUBMISSION_RECIPIENT", "hello@chooseruby.com") }
   default from: -> { ENV.fetch("RESOURCE_SUBMISSION_SENDER", "hello@chooseruby.com") }
