@@ -5,6 +5,9 @@ module Imports
     # Helper methods for importing data from PostgreSQL dump
     # Provides ID mapping for polymorphic associations and data conversion utilities
     module Helpers
+      # Values a PostgreSQL dump uses to mean "no value"
+      NULL_MARKERS = [ '\N', "" ].freeze
+
       # Module-level instance variables for ID mapping
       @entry_lookup = {}
       @author_lookup = {}
@@ -46,7 +49,7 @@ module Imports
         # Data conversion helpers
 
         def parse_time(str)
-          return nil if str.nil? || str == '\N' || str.empty?
+          return nil if NULL_MARKERS.include?(str.to_s)
           Time.zone.parse(str)
         rescue ArgumentError
           nil
@@ -57,7 +60,7 @@ module Imports
         end
 
         def to_int(str)
-          return nil if str.nil? || str == '\N' || str.empty?
+          return nil if NULL_MARKERS.include?(str.to_s)
           str.to_i
         end
 
