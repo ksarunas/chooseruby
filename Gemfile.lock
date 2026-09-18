@@ -563,6 +563,7 @@ DEPENDENCIES
   rails!
   reek
   rubocop-minitest
+  rubocop-performance
   rubocop-rails-omakase
   rubocop-thread_safety
   selenium-webdriver

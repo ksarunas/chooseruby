@@ -13,7 +13,7 @@ class ResourceUrl
     @url.strip.downcase
       .sub(%r{\Ahttps://}, "http://")
       .sub(%r{\Ahttp://www\.}, "http://")
-      .sub(%r{/\z}, "")
+      .delete_suffix("/")
   end
 
   # The entry already in the directory that points at this same address.

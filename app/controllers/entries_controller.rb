@@ -75,7 +75,7 @@ class EntriesController < ApplicationController
   end
 
   def too_many_categories?
-    all_permitted_params[:category_ids].to_a.reject(&:blank?).length > Entry::MAX_CATEGORIES
+    all_permitted_params[:category_ids].to_a.count(&:present?) > Entry::MAX_CATEGORIES
   end
 
   # Redisplays the submission form with the entry's errors shown.

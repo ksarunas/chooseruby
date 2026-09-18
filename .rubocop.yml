@@ -8,6 +8,7 @@ inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 plugins:
   - rubocop-minitest
   - rubocop-thread_safety
+  - rubocop-performance
 
 # Overwrite or add rules to create your own house style
 #
@@ -47,6 +48,10 @@ ThreadSafety/ClassInstanceVariable:
 ThreadSafety/MutableClassInstanceVariable:
   Exclude:
     - "lib/imports/rubyandrailsinfo/helpers.rb"
+
+# Catch common performance anti-patterns (unnecessary allocations, slow idioms).
+Performance:
+  Enabled: true
 
 # Catch Minitest-specific style/correctness issues (assert_not over refute, etc).
 Minitest:
