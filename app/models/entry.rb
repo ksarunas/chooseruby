@@ -201,6 +201,11 @@ class Entry < ApplicationRecord
   scope :recently_curated, -> { order(updated_at: :desc) }
   # Entries of one directory type, named by the slug used in directory URLs.
   scope :of_type, ->(slug) { where(entryable_type: VALID_TYPES.fetch(slug)) }
+  # Entries loaded ready to render as directory cards.
+  scope :with_card_includes, lambda {
+    strict_loading.includes(:categories, :rich_text_description, :entryable, { image_attachment: :blob },
+                            authors: { avatar_attachment: :blob })
+  }
   # The featured entries of one type, most recently featured first.
   scope :featured_of_type, ->(slug) { visible.of_type(slug).featured.with_directory_includes }
   scope :with_directory_includes, -> { preload(:entryable, :categories, :authors, :rich_text_description) }

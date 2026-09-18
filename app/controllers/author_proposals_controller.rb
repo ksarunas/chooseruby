@@ -18,8 +18,10 @@ class AuthorProposalsController < ApplicationController
   # Display proposal form for existing author
   # GET /authors/:author_id/propose_edit
   def new
-    @author = Author.approved.find(params[:author_id])
-    @author_proposal = AuthorProposal.new(author: @author)
+    author = Author.approved.find(params[:author_id])
+
+    @author = author
+    @author_proposal = AuthorProposal.new(author: author)
   rescue ActiveRecord::RecordNotFound
     render file: "#{Rails.root}/public/404.html", status: :not_found, layout: false
   end
@@ -33,11 +35,12 @@ class AuthorProposalsController < ApplicationController
   # Process proposal submission
   # POST /author_proposals
   def create
-    @author_proposal = AuthorProposal.new(author_proposal_params)
+    proposal = AuthorProposal.new(author_proposal_params)
 
-    return redirect_to author_proposal_success_path(@author_proposal) if @author_proposal.save
+    @author_proposal = proposal
+    return redirect_to author_proposal_success_path(proposal) if proposal.save
 
-    render_proposal_form
+    render_proposal_form(proposal)
   end
 
   # Display success confirmation page
@@ -53,8 +56,8 @@ class AuthorProposalsController < ApplicationController
   # Strong parameters for author proposal
   # Redisplays the form the proposal came from, reloading the author it concerns
   # so the fields can be shown again.
-  def render_proposal_form
-    proposed_author_id = @author_proposal.author_id
+  def render_proposal_form(proposal)
+    proposed_author_id = proposal.author_id
     return render :new_author, status: :unprocessable_entity if proposed_author_id.blank?
 
     @author = Author.find_by(id: proposed_author_id)
