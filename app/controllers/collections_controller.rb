@@ -2,7 +2,7 @@
 
 # Curated collections of entries, each with its own filters.
 class CollectionsController < ApplicationController
-  before_action :load_collection, only: :show
+  PER_PAGE = 12
 
   def index
     @collections = curated_collections_data
@@ -10,22 +10,37 @@ class CollectionsController < ApplicationController
   end
 
   def show
-    @categories = Category.order(:display_order, :name)
-    @base_filters = @collection.fetch(:filters, {}).symbolize_keys
-    override_filters = params.permit(:q, :level, :category).to_h.symbolize_keys
-    merged_filters = @base_filters.merge(override_filters) do |_key, base, override|
-      override.present? ? override : base
-    end
+    collection = find_collection
 
-    @directory_query = EntryDirectoryQuery.new(merged_filters)
-    @entries = @directory_query.call.page(params[:page]).per(12)
+    @collection = collection
+    @categories = Category.order(:display_order, :name)
+
+    assign_entries(collection)
   end
 
   private
 
-  def load_collection
+  def find_collection
     slug = params[:id]
-    @collection = curated_collections_data.find { |collection| collection[:slug] == slug }
-    raise ActiveRecord::RecordNotFound, "Collection not found" unless @collection
+    collection = curated_collections_data.find { |candidate| candidate[:slug] == slug }
+    raise ActiveRecord::RecordNotFound, "Collection not found" unless collection
+
+    collection
+  end
+
+  def assign_entries(collection)
+    directory_query = EntryDirectoryQuery.new(collection_filters(collection))
+
+    @directory_query = directory_query
+    @entries = directory_query.call.page(params[:page]).per(PER_PAGE)
+  end
+
+  # The collection's own filters, with anything the reader chose taking over.
+  def collection_filters(collection)
+    overrides = params.permit(:q, :level, :category).to_h.symbolize_keys
+
+    collection.fetch(:filters, {}).symbolize_keys.merge(overrides) do |_key, base, override|
+      override.presence || base
+    end
   end
 end

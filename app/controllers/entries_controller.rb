@@ -2,50 +2,37 @@
 
 # The directory itself: browsing, searching and submitting entries.
 class EntriesController < ApplicationController
+  PER_PAGE = 25
+  POPULAR_QUERY_LIMIT = 5
+  SUGGESTION_LIMIT = 5
+  SUGGESTION_TYPE_LIMIT = 4
+  ENTRY_FIELDS = %i[title url description image_url experience_level submitter_name submitter_email category_ids].freeze
+
   before_action :load_form_data, only: %i[new create]
 
   def index
-    @categories = Category.order(:display_order, :name)
-    permitted_params = params.permit(:q, :level, :category, :sort).to_h
-    @directory_query = EntryDirectoryQuery.new(permitted_params)
-    @query = @directory_query.query
-    @active_level = @directory_query.level
-    @active_category = @directory_query.category
-    @active_sort = @directory_query.sort
-    @popular_queries = popular_queries
-    @entries = @directory_query.call.page(params[:page]).per(25)
+    categories = Category.order(:display_order, :name)
+
+    @categories = categories
+    @popular_queries = categories.limit(POPULAR_QUERY_LIMIT).pluck(:name)
+    assign_directory(EntryDirectoryQuery.new(params.permit(:q, :level, :category, :sort).to_h))
   end
 
   def start
-    @categories = Category.order(:display_order, :name)
-    level_param = params[:level].presence || "beginner"
-    permitted_params = params.permit(:q, :category, :sort, :level).to_h.merge(level: level_param)
-    @directory_query = EntryDirectoryQuery.new(permitted_params)
-    @query = @directory_query.query
-    @active_level = level_param
-    @active_category = @directory_query.category
-    @active_sort = @directory_query.sort
-    @popular_queries = popular_queries
-    @entries = @directory_query.call.page(params[:page]).per(25)
+    level = params[:level].presence || "beginner"
+    categories = Category.order(:display_order, :name)
+
+    @categories = categories
+    @popular_queries = categories.limit(POPULAR_QUERY_LIMIT).pluck(:name)
+    assign_directory(EntryDirectoryQuery.new(params.permit(:q, :category, :sort, :level).to_h.merge(level: level)))
   end
 
   def suggestions
-    @query = params[:q].to_s.strip
-    return head :ok if @query.length < 2
+    query = params[:q].to_s.strip
+    return head :ok if query.length < 2
 
-    @popular_queries = popular_queries
-
-    # Sanitize LIKE wildcards to prevent LIKE injection
-    sanitized_query = ActiveRecord::Base.sanitize_sql_like(@query)
-
-    @categories = Category.where("name LIKE ?", "%#{sanitized_query}%").order(:name).limit(5)
-    @types = Entry::VALID_TYPES.keys.filter do |type_slug|
-      ResourceType[type_slug].name.downcase.include?(@query.downcase)
-    end.first(4)
-    @entries = Entry.visible
-      .where("title LIKE ?", "%#{sanitized_query}%")
-      .order(updated_at: :desc)
-      .limit(5)
+    @query = query
+    assign_suggestions(query)
 
     render partial: "entries/suggestions"
   end
@@ -55,47 +42,12 @@ class EntriesController < ApplicationController
   end
 
   def create
-    # Validate category limit before processing
-    category_ids = all_permitted_params[:category_ids].to_a.reject(&:blank?)
-    if category_ids.length > 3
-      @entry = Entry.new(common_entry_params)
-      @entry.errors.add(:categories, "You can select a maximum of 3 categories")
-      flash.now[:alert] = "Please review the highlighted fields."
-      render :new, status: :unprocessable_entity
-      return
-    end
+    entry = Entry.new(all_permitted_params.slice(*ENTRY_FIELDS))
 
-    # Build entry with only Entry attributes
-    @entry = Entry.new(common_entry_params)
-    @entry.status = :pending
-    @entry.published = false
+    return render_invalid_entry(entry, "You can select a maximum of 3 categories") if too_many_categories?
+    return render_invalid_entry(entry) unless save_entry(entry)
 
-    ActiveRecord::Base.transaction do
-      # Build the appropriate delegated type
-      entryable = build_entryable
-      @entry.entryable = entryable
-
-      if @entry.save
-        # Handle author association if author_id is provided
-        if all_permitted_params[:author_id].present?
-          author = Author.find_by(id: all_permitted_params[:author_id])
-          @entry.authors << author if author
-        end
-
-        # Send notification emails asynchronously
-        ResourceSubmissionMailer.notify_team(@entry).deliver_later
-        ResourceSubmissionMailer.confirm_submitter(@entry).deliver_later
-
-        redirect_to entry_success_path
-      else
-        raise ActiveRecord::Rollback
-      end
-    end
-
-    unless @entry.persisted?
-      flash.now[:alert] = "Please review the highlighted fields."
-      render :new, status: :unprocessable_entity
-    end
+    notify_and_redirect(entry)
   end
 
   def success
@@ -104,8 +56,57 @@ class EntriesController < ApplicationController
 
   private
 
-  def popular_queries
-    Category.order(:display_order, :name).limit(5).pluck(:name)
+  def assign_directory(directory_query)
+    @query = directory_query.query
+    @active_level = directory_query.level
+    @active_category = directory_query.category
+    @active_sort = directory_query.sort
+    @entries = directory_query.call.page(params[:page]).per(PER_PAGE)
+  end
+
+  def assign_suggestions(query)
+    # Sanitize LIKE wildcards to prevent LIKE injection
+    pattern = "%#{ActiveRecord::Base.sanitize_sql_like(query)}%"
+
+    @popular_queries = Category.order(:display_order, :name).limit(POPULAR_QUERY_LIMIT).pluck(:name)
+    @categories = Category.where("name LIKE ?", pattern).order(:name).limit(SUGGESTION_LIMIT)
+    @types = Entry.type_slugs_matching(query).first(SUGGESTION_TYPE_LIMIT)
+    @entries = Entry.visible.where("title LIKE ?", pattern).order(updated_at: :desc).limit(SUGGESTION_LIMIT)
+  end
+
+  def too_many_categories?
+    all_permitted_params[:category_ids].to_a.reject(&:blank?).length > Entry::MAX_CATEGORIES
+  end
+
+  # Redisplays the submission form with the entry's errors shown.
+  def render_invalid_entry(entry, message = nil)
+    entry.errors.add(:categories, message) if message
+
+    @entry = entry
+    flash.now[:alert] = "Please review the highlighted fields."
+    render :new, status: :unprocessable_entity
+  end
+
+  # Saves the entry together with the type specific record behind it.
+  def save_entry(entry)
+    entryable = Entry::EntryableBuilder.new(params.dig(:entry, :resource_type), all_permitted_params).build
+    entry.assign_attributes(status: :pending, published: false, entryable: entryable)
+
+    ActiveRecord::Base.transaction { entry.save && attach_author(entry) }
+  end
+
+  def attach_author(entry)
+    author = Author.find_by(id: all_permitted_params[:author_id])
+    entry.authors << author if author
+
+    true
+  end
+
+  def notify_and_redirect(entry)
+    ResourceSubmissionMailer.notify_team(entry).deliver_later
+    ResourceSubmissionMailer.confirm_submitter(entry).deliver_later
+
+    redirect_to entry_success_path
   end
 
   def load_form_data
@@ -168,132 +169,6 @@ class EntriesController < ApplicationController
       :member_count,
       :is_official,
       category_ids: []
-    )
-  end
-
-  def common_entry_params
-    all_permitted_params.slice(
-      :title,
-      :url,
-      :description,
-      :image_url,
-      :experience_level,
-      :submitter_name,
-      :submitter_email,
-      :category_ids
-    )
-  end
-
-  def build_entryable
-    resource_type = params.dig(:entry, :resource_type)
-
-    case resource_type
-    when "RubyGem"
-      RubyGem.new(ruby_gem_params)
-    when "Book"
-      Book.new(book_params)
-    when "Course"
-      Course.new(course_params)
-    when "Tutorial"
-      Tutorial.new(tutorial_params)
-    when "Article"
-      Article.new(article_params)
-    when "Tool"
-      Tool.new(tool_params)
-    when "Podcast"
-      Podcast.new(podcast_params)
-    when "Community"
-      Community.new(community_params)
-    else
-      raise ArgumentError, "Unknown resource type: #{resource_type}"
-    end
-  end
-
-  def ruby_gem_params
-    all_permitted_params.slice(
-      :gem_name,
-      :github_url,
-      :documentation_url,
-      :rubygems_url,
-      :current_version,
-      :downloads_count
-    )
-  end
-
-  def book_params
-    all_permitted_params.slice(
-      :isbn,
-      :publisher,
-      :publication_year,
-      :page_count,
-      :format,
-      :purchase_url
-    )
-  end
-
-  def course_params
-    params_hash = all_permitted_params.slice(
-      :platform,
-      :instructor,
-      :duration_hours,
-      :currency,
-      :is_free,
-      :enrollment_url
-    )
-
-    # Convert price from dollars to cents
-    if all_permitted_params[:price].present?
-      params_hash[:price_cents] = (all_permitted_params[:price].to_d * 100).to_i
-    end
-
-    params_hash
-  end
-
-  def tutorial_params
-    all_permitted_params.slice(
-      :reading_time_minutes,
-      :publication_date,
-      :author_name,
-      :platform
-    )
-  end
-
-  def article_params
-    all_permitted_params.slice(
-      :reading_time_minutes,
-      :publication_date,
-      :author_name,
-      :platform
-    )
-  end
-
-  def tool_params
-    all_permitted_params.slice(
-      :tool_type,
-      :github_url,
-      :documentation_url,
-      :license,
-      :is_open_source
-    )
-  end
-
-  def podcast_params
-    all_permitted_params.slice(
-      :host,
-      :episode_count,
-      :frequency,
-      :rss_feed_url,
-      :spotify_url,
-      :apple_podcasts_url
-    )
-  end
-
-  def community_params
-    all_permitted_params.slice(
-      :platform,
-      :join_url,
-      :member_count,
-      :is_official
     )
   end
 end

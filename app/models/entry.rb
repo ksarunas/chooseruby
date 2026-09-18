@@ -122,6 +122,9 @@ class Entry < ApplicationRecord
 
   # Constants
   # Task 2.3: Type parameter to entryable_type mapping for filtering
+  # How many categories a single entry may be filed under.
+  MAX_CATEGORIES = 3
+
   VALID_TYPES = {
     "gems" => "RubyGem",
     "books" => "Book",
@@ -151,6 +154,13 @@ class Entry < ApplicationRecord
   # is implied by the others rather than chosen.
   def self.selectable_experience_levels
     experience_levels.keys - [ "all_levels" ]
+  end
+
+  # The type slugs whose display name contains the given text.
+  def self.type_slugs_matching(text)
+    needle = text.downcase
+
+    VALID_TYPES.keys.filter { |slug| ResourceType[slug].name.downcase.include?(needle) }
   end
 
   # The most recently curated entries of every type, keyed by type slug, for the
@@ -191,6 +201,8 @@ class Entry < ApplicationRecord
   scope :recently_curated, -> { order(updated_at: :desc) }
   # Entries of one directory type, named by the slug used in directory URLs.
   scope :of_type, ->(slug) { where(entryable_type: VALID_TYPES.fetch(slug)) }
+  # The featured entries of one type, most recently featured first.
+  scope :featured_of_type, ->(slug) { visible.of_type(slug).featured.with_directory_includes }
   scope :with_directory_includes, -> { preload(:entryable, :categories, :authors, :rich_text_description) }
   # Entries suitable for the requested experience level, which always includes
   # the ones marked as suitable for all levels. An unknown level does not narrow

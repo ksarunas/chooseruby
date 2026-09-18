@@ -83,6 +83,16 @@ class Category < ApplicationRecord
       .limit(limit)
   end
 
+  # The categories holding visible entries of one type, each with how many it
+  # holds, largest first.
+  def self.with_entry_counts_for_type(slug)
+    counts = Entry.visible.of_type(slug).joins(:categories_entries).group("categories_entries.category_id").count
+
+    where(id: counts.keys)
+      .map { |category| { category: category, count: counts[category.id] } }
+      .sort_by { |stat| -stat[:count] }
+  end
+
   private
 
   # Generate URL-friendly slug from name
