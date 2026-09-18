@@ -78,6 +78,9 @@ group :development, :test do
 
   # Code coverage analysis, enforces 100% line and branch coverage (see .simplecov)
   gem "simplecov", require: false
+
+  # Code smell detector, enforces zero offenses (see .reek.yml)
+  gem "reek", require: false
 end
 
 group :development do
