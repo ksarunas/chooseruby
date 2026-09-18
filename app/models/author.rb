@@ -80,6 +80,11 @@ class Author < ApplicationRecord
 
   # Scopes
   scope :approved, -> { where(status: :approved) }
+  # Annotates each author with how many entries they contributed to, keeping
+  # authors that have none.
+  scope :with_entry_counts, -> {
+    select("authors.*, COUNT(entries.id) as entries_count").left_joins(:entries).group("authors.id")
+  }
   scope :pending, -> { where(status: :pending) }
 
   private

@@ -176,6 +176,15 @@ class Entry < ApplicationRecord
   scope :visible, -> { published.approved }
   scope :recently_curated, -> { order(updated_at: :desc) }
   scope :with_directory_includes, -> { preload(:entryable, :categories, :authors, :rich_text_description) }
+  # Entries suitable for the requested experience level, which always includes
+  # the ones marked as suitable for all levels. An unknown level does not narrow
+  # the scope.
+  scope :at_experience_level, ->(level) {
+    selected = experience_levels[level]
+    next all if selected.nil?
+
+    where(experience_level: [ selected, experience_levels["all_levels"] ])
+  }
 
   # Task 2.5: Featured scope - returns entries with featured_at set, ordered by most recent
   scope :featured, -> { where.not(featured_at: nil).order(featured_at: :desc) }
