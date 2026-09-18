@@ -1,17 +1,31 @@
 # frozen_string_literal: true
 
+# Narrows the resource list down to the entries filed under one category.
 class Avo::Filters::EntryCategoryFilter < Avo::Filters::SelectFilter
   self.name = "Category"
 
-  def apply(request, query, value)
+  def apply(_request, query, value)
     return query if value.blank?
 
-    # Filter entries that belong to the selected category
-    query.joins(:categories).where(categories: { id: value })
+    join = association
+    query.joins(join).where(join => { id: value })
   end
 
   def options
-    # Get all categories ordered by name
-    Category.order(:name).pluck(:name, :id).to_h
+    column = label_column
+
+    Category.order(column).pluck(column, :id).to_h
+  end
+
+  private
+
+  # Entries reach their categories through this association.
+  def association
+    :categories
+  end
+
+  # The category column shown to the admin in the dropdown.
+  def label_column
+    :name
   end
 end

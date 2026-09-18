@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Makes every selected resource visible on the public directory.
 class Avo::Actions::PublishEntries < Avo::BaseAction
   self.name = "Publish Resources"
   self.message = "Are you sure you want to publish the selected resources?"
@@ -7,11 +8,16 @@ class Avo::Actions::PublishEntries < Avo::BaseAction
   self.cancel_button_label = "Cancel"
   self.no_confirmation = false
 
-  def handle(records:, fields:, current_user:, resource:, **args)
-    records.each do |resource|
-      resource.update(published: true)
-    end
+  def handle(records:, **_args)
+    records.each { |entry| entry.update(published: true) }
+    count = records.count
 
-    succeed "#{records.count} #{'resource'.pluralize(records.count)} published successfully!"
+    succeed "#{count} #{noun.pluralize(count)} published successfully!"
+  end
+
+  private
+
+  def noun
+    "resource"
   end
 end

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Grants approved status to every selected author in one go.
 class Avo::Actions::ApproveAuthors < Avo::BaseAction
   self.name = "Approve Authors"
   self.message = "Are you sure you want to approve the selected authors?"
@@ -7,11 +8,16 @@ class Avo::Actions::ApproveAuthors < Avo::BaseAction
   self.cancel_button_label = "Cancel"
   self.no_confirmation = false
 
-  def handle(records:, fields:, current_user:, resource:, **args)
-    records.each do |author|
-      author.update(status: :approved)
-    end
+  def handle(records:, **_args)
+    records.each { |author| author.update(status: :approved) }
+    count = records.count
 
-    succeed "#{records.count} #{'author'.pluralize(records.count)} approved successfully!"
+    succeed "#{count} #{noun.pluralize(count)} approved successfully!"
+  end
+
+  private
+
+  def noun
+    "author"
   end
 end
