@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Admin screens for the audit trail of curation decisions on an entry.
 class Avo::Resources::EntryReview < Avo::BaseResource
   self.model_class = ::EntryReview
   self.title = :id
@@ -9,6 +10,13 @@ class Avo::Resources::EntryReview < Avo::BaseResource
   def fields
     field :id, as: :id, link_to_record: true
 
+    review_fields
+    timestamp_fields
+  end
+
+  private
+
+  def review_fields
     field :entry, as: :belongs_to,
           searchable: true,
           help: "Entry that was reviewed"
@@ -24,7 +32,9 @@ class Avo::Resources::EntryReview < Avo::BaseResource
     field :reviewer_id, as: :number,
           hide_on: [ :index ],
           help: "Admin reviewer id (future use)"
+  end
 
+  def timestamp_fields
     field :created_at, as: :date_time, readonly: true, sortable: true
     field :updated_at, as: :date_time, readonly: true, hide_on: [ :index ]
   end
