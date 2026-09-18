@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Browsing the directory one category at a time.
 class CategoriesController < ApplicationController
   before_action :load_category, only: :show
 

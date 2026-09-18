@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Curated collections of entries, each with its own filters.
 class CollectionsController < ApplicationController
   before_action :load_collection, only: :show
 

@@ -263,27 +263,27 @@
     <div class="space-y-24" data-type-sections-toggle-target="container">
       <%# Task 5.5: Type sections - positioned AFTER \"Freshly curated resources\" %>
       <%# Existing 8 types %>
-      <%= render "home/type_section", type: "gems", entries: @recent_gems, emoji: ResourceType["gems"].emoji, title: ResourceType["gems"].name, section_data: { type_sections_toggle_target: "section" } %>
-      <%= render "home/type_section", type: "books", entries: @recent_books, emoji: ResourceType["books"].emoji, title: ResourceType["books"].name, section_data: { type_sections_toggle_target: "section" } %>
-      <%= render "home/type_section", type: "courses", entries: @recent_courses, emoji: ResourceType["courses"].emoji, title: ResourceType["courses"].name, section_data: { type_sections_toggle_target: "section" } %>
-      <%= render "home/type_section", type: "tutorials", entries: @recent_tutorials, emoji: ResourceType["tutorials"].emoji, title: ResourceType["tutorials"].name, section_data: { type_sections_toggle_target: "section" } %>
-      <%= render "home/type_section", type: "articles", entries: @recent_articles, emoji: ResourceType["articles"].emoji, title: ResourceType["articles"].name, section_data: { type_sections_toggle_target: "section" } %>
-      <%= render "home/type_section", type: "tools", entries: @recent_tools, emoji: ResourceType["tools"].emoji, title: ResourceType["tools"].name, section_data: { type_sections_toggle_target: "section" } %>
-      <%= render "home/type_section", type: "podcasts", entries: @recent_podcasts, emoji: ResourceType["podcasts"].emoji, title: ResourceType["podcasts"].name, section_data: { type_sections_toggle_target: "section" } %>
-      <%= render "home/type_section", type: "communities", entries: @recent_communities, emoji: ResourceType["communities"].emoji, title: ResourceType["communities"].name, section_data: { type_sections_toggle_target: "section" } %>
+      <%= render "home/type_section", type: "gems", entries: @recent_entries["gems"], emoji: ResourceType["gems"].emoji, title: ResourceType["gems"].name, section_data: { type_sections_toggle_target: "section" } %>
+      <%= render "home/type_section", type: "books", entries: @recent_entries["books"], emoji: ResourceType["books"].emoji, title: ResourceType["books"].name, section_data: { type_sections_toggle_target: "section" } %>
+      <%= render "home/type_section", type: "courses", entries: @recent_entries["courses"], emoji: ResourceType["courses"].emoji, title: ResourceType["courses"].name, section_data: { type_sections_toggle_target: "section" } %>
+      <%= render "home/type_section", type: "tutorials", entries: @recent_entries["tutorials"], emoji: ResourceType["tutorials"].emoji, title: ResourceType["tutorials"].name, section_data: { type_sections_toggle_target: "section" } %>
+      <%= render "home/type_section", type: "articles", entries: @recent_entries["articles"], emoji: ResourceType["articles"].emoji, title: ResourceType["articles"].name, section_data: { type_sections_toggle_target: "section" } %>
+      <%= render "home/type_section", type: "tools", entries: @recent_entries["tools"], emoji: ResourceType["tools"].emoji, title: ResourceType["tools"].name, section_data: { type_sections_toggle_target: "section" } %>
+      <%= render "home/type_section", type: "podcasts", entries: @recent_entries["podcasts"], emoji: ResourceType["podcasts"].emoji, title: ResourceType["podcasts"].name, section_data: { type_sections_toggle_target: "section" } %>
+      <%= render "home/type_section", type: "communities", entries: @recent_entries["communities"], emoji: ResourceType["communities"].emoji, title: ResourceType["communities"].name, section_data: { type_sections_toggle_target: "section" } %>
 
       <%# Task 4.13: New type sections in alphabetical order %>
-      <%= render "home/type_section", type: "blogs", entries: @recent_blogs, emoji: ResourceType["blogs"].emoji, title: ResourceType["blogs"].name, section_data: { type_sections_toggle_target: "section" } %>
-      <%= render "home/type_section", type: "channels", entries: @recent_channels, emoji: ResourceType["channels"].emoji, title: ResourceType["channels"].name, section_data: { type_sections_toggle_target: "section" } %>
-      <%= render "home/type_section", type: "directories", entries: @recent_directories, emoji: ResourceType["directories"].emoji, title: ResourceType["directories"].name, section_data: { type_sections_toggle_target: "section" } %>
-      <%= render "home/type_section", type: "documentations", entries: @recent_documentations, emoji: ResourceType["documentations"].emoji, title: ResourceType["documentations"].name, section_data: { type_sections_toggle_target: "section" } %>
-      <%= render "home/type_section", type: "development-environments", entries: @recent_development_environments, emoji: ResourceType["development-environments"].emoji, title: ResourceType["development-environments"].name, section_data: { type_sections_toggle_target: "section" } %>
-      <%= render "home/type_section", type: "frameworks", entries: @recent_frameworks, emoji: ResourceType["frameworks"].emoji, title: ResourceType["frameworks"].name, section_data: { type_sections_toggle_target: "section" } %>
-      <%= render "home/type_section", type: "job-boards", entries: @recent_job_boards, emoji: ResourceType["job-boards"].emoji, title: ResourceType["job-boards"].name, section_data: { type_sections_toggle_target: "section" } %>
-      <%= render "home/type_section", type: "newsletters", entries: @recent_newsletters, emoji: ResourceType["newsletters"].emoji, title: ResourceType["newsletters"].name, section_data: { type_sections_toggle_target: "section" } %>
-      <%= render "home/type_section", type: "products", entries: @recent_products, emoji: ResourceType["products"].emoji, title: ResourceType["products"].name, section_data: { type_sections_toggle_target: "section" } %>
-      <%= render "home/type_section", type: "testing-resources", entries: @recent_testing_resources, emoji: ResourceType["testing-resources"].emoji, title: ResourceType["testing-resources"].name, section_data: { type_sections_toggle_target: "section" } %>
-      <%= render "home/type_section", type: "videos", entries: @recent_videos, emoji: ResourceType["videos"].emoji, title: ResourceType["videos"].name, section_data: { type_sections_toggle_target: "section" } %>
+      <%= render "home/type_section", type: "blogs", entries: @recent_entries["blogs"], emoji: ResourceType["blogs"].emoji, title: ResourceType["blogs"].name, section_data: { type_sections_toggle_target: "section" } %>
+      <%= render "home/type_section", type: "channels", entries: @recent_entries["channels"], emoji: ResourceType["channels"].emoji, title: ResourceType["channels"].name, section_data: { type_sections_toggle_target: "section" } %>
+      <%= render "home/type_section", type: "directories", entries: @recent_entries["directories"], emoji: ResourceType["directories"].emoji, title: ResourceType["directories"].name, section_data: { type_sections_toggle_target: "section" } %>
+      <%= render "home/type_section", type: "documentations", entries: @recent_entries["documentations"], emoji: ResourceType["documentations"].emoji, title: ResourceType["documentations"].name, section_data: { type_sections_toggle_target: "section" } %>
+      <%= render "home/type_section", type: "development-environments", entries: @recent_entries["development-environments"], emoji: ResourceType["development-environments"].emoji, title: ResourceType["development-environments"].name, section_data: { type_sections_toggle_target: "section" } %>
+      <%= render "home/type_section", type: "frameworks", entries: @recent_entries["frameworks"], emoji: ResourceType["frameworks"].emoji, title: ResourceType["frameworks"].name, section_data: { type_sections_toggle_target: "section" } %>
+      <%= render "home/type_section", type: "job-boards", entries: @recent_entries["job-boards"], emoji: ResourceType["job-boards"].emoji, title: ResourceType["job-boards"].name, section_data: { type_sections_toggle_target: "section" } %>
+      <%= render "home/type_section", type: "newsletters", entries: @recent_entries["newsletters"], emoji: ResourceType["newsletters"].emoji, title: ResourceType["newsletters"].name, section_data: { type_sections_toggle_target: "section" } %>
+      <%= render "home/type_section", type: "products", entries: @recent_entries["products"], emoji: ResourceType["products"].emoji, title: ResourceType["products"].name, section_data: { type_sections_toggle_target: "section" } %>
+      <%= render "home/type_section", type: "testing-resources", entries: @recent_entries["testing-resources"], emoji: ResourceType["testing-resources"].emoji, title: ResourceType["testing-resources"].name, section_data: { type_sections_toggle_target: "section" } %>
+      <%= render "home/type_section", type: "videos", entries: @recent_entries["videos"], emoji: ResourceType["videos"].emoji, title: ResourceType["videos"].name, section_data: { type_sections_toggle_target: "section" } %>
     </div>
 
     <div class="flex justify-center">

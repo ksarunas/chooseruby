@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Records who and where the current request came from, for the models to read.
 module SetCurrentRequest
   extend ActiveSupport::Concern
 

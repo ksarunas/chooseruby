@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Static pages such as about and the privacy policy.
 class PagesController < ApplicationController
   def why_ruby
     @pillars = [

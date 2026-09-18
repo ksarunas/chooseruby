@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Signing in and out.
 class SessionsController < ApplicationController
   def new
     # Renders login form

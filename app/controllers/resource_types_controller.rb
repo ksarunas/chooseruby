@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Browsing the directory one resource type at a time, such as gems or books.
 class ResourceTypesController < ApplicationController
   before_action :validate_type_parameter
 

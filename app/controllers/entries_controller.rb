@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# The directory itself: browsing, searching and submitting entries.
 class EntriesController < ApplicationController
   before_action :load_form_data, only: %i[new create]
 

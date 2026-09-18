@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Turns away requests from banned users and banned IP addresses.
 module BlockBannedRequests
   extend ActiveSupport::Concern
 

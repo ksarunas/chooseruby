@@ -152,6 +152,14 @@ class Entry < ApplicationRecord
   def self.selectable_experience_levels
     experience_levels.keys - [ "all_levels" ]
   end
+
+  # The most recently curated entries of every type, keyed by type slug, for the
+  # front page previews.
+  def self.recently_curated_by_type(limit:)
+    VALID_TYPES.keys.index_with do |slug|
+      of_type(slug).visible.with_directory_includes.recently_curated.limit(limit)
+    end
+  end
   enum :status, { pending: 0, approved: 1, rejected: 2 }, default: :pending
 
   # Validations
@@ -181,6 +189,8 @@ class Entry < ApplicationRecord
   scope :pending, -> { where(status: :pending) }
   scope :visible, -> { published.approved }
   scope :recently_curated, -> { order(updated_at: :desc) }
+  # Entries of one directory type, named by the slug used in directory URLs.
+  scope :of_type, ->(slug) { where(entryable_type: VALID_TYPES.fetch(slug)) }
   scope :with_directory_includes, -> { preload(:entryable, :categories, :authors, :rich_text_description) }
   # Entries suitable for the requested experience level, which always includes
   # the ones marked as suitable for all levels. An unknown level does not narrow

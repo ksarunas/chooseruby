@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Refusing requests from users who lack the role a page requires.
 module Authorization
   extend ActiveSupport::Concern
 

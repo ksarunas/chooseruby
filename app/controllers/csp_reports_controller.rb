@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Receives Content Security Policy violation reports from browsers.
 class CspReportsController < ActionController::Base
   skip_before_action :verify_authenticity_token
 

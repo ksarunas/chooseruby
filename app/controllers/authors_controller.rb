@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# The public author directory and individual author pages.
 class AuthorsController < ApplicationController
   def index
     # Initialize search query with permitted params

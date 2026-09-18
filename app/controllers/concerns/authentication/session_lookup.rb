@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Authentication
+  # Finding the signed in session from the cookie the browser sent.
   module SessionLookup
     extend ActiveSupport::Concern
 

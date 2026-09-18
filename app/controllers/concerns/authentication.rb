@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Knowing who is signed in, and requiring that somebody is.
 module Authentication
   extend ActiveSupport::Concern
 

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Individual resource pages and the resource listing they are reached from.
 class ResourcesController < ApplicationController
   def index
     @categories = Category.order(:display_order, :name)

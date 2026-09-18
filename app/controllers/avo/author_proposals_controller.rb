@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Admin screens for reviewing author proposals.
 class Avo::AuthorProposalsController < Avo::ResourcesController
   # This controller handles the Avo admin interface for AuthorProposal resources.
   # Proposals are created via public forms and reviewed through the approve/reject
