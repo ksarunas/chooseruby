@@ -1,4 +1,14 @@
 #!/usr/bin/env ruby
 APP_PATH = File.expand_path("../config/application", __dir__)
 require_relative "../config/boot"
+
+# The `test` command runs `test:prepare` (which boots the application) before
+# loading test/test_helper.rb, so SimpleCov must start here to measure files
+# loaded during boot. Applies to `bin/rails test` and `bin/rails db:test:prepare test`.
+# COVERAGE=false disables coverage (used for system tests, which run separately).
+if ARGV.include?("test") && ENV["COVERAGE"] != "false"
+  require "simplecov"
+  SimpleCov.start
+end
+
 require "rails/commands"
