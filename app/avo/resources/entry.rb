@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Admin screens for the directory entries themselves, the record every other
+# resource type hangs off.
 class Avo::Resources::Entry < Avo::BaseResource
   self.title = :title
   self.includes = [ :entryable, :categories, :authors, :entry_reviews ]
@@ -17,44 +19,71 @@ class Avo::Resources::Entry < Avo::BaseResource
   }
 
   def fields
-    field :id, as: :id, link_to_record: true
+    basic_fields
+    entryable_fields
+    curation_fields
+    submission_fields
+    association_fields
+  end
 
-    # Basic information
+  def filters
+    status_filters
+    classification_filters
+  end
+
+  def actions
+    action Avo::Actions::ApproveEntries
+    action Avo::Actions::RejectEntries
+    action Avo::Actions::PublishEntries
+    action Avo::Actions::UnpublishEntries
+  end
+
+  private
+
+  def basic_fields
+    field :id, as: :id, link_to_record: true
     field :title, as: :text, required: true, sortable: true, help: "2-200 characters"
     field :description, as: :trix, required: true, help: "Rich text description of the resource"
     field :url, as: :text, required: true, help: "Primary URL link to the resource"
+  end
 
-    # Polymorphic association to the specific entry type (Book, RubyGem, etc.)
+  # The polymorphic association to the specific entry type (Book, RubyGem, ...)
+  # together with the artwork shown next to it.
+  def entryable_fields
     field :entryable, as: :belongs_to,
           polymorphic_as: :entryable,
-          types: [
-            ::Article,
-            ::Blog,
-            ::Book,
-            ::Channel,
-            ::Community,
-            ::Course,
-            ::DevelopmentEnvironment,
-            ::Directory,
-            ::Documentation,
-            ::Framework,
-            ::JobBoard,
-            ::Newsletter,
-            ::Podcast,
-            ::Product,
-            ::RubyGem,
-            ::TestingResource,
-            ::Tool,
-            ::Tutorial,
-            ::Video
-          ],
+          types: entryable_types,
           help: "Select the type and specific record for this entry"
 
-    # Image handling
     field :image, as: :file, help: "Upload an image/logo for the resource"
     field :image_url, as: :text, help: "Or provide an external image URL", hide_on: [ :index ]
+  end
 
-    # Classification and status
+  def entryable_types
+    [
+      ::Article,
+      ::Blog,
+      ::Book,
+      ::Channel,
+      ::Community,
+      ::Course,
+      ::DevelopmentEnvironment,
+      ::Directory,
+      ::Documentation,
+      ::Framework,
+      ::JobBoard,
+      ::Newsletter,
+      ::Podcast,
+      ::Product,
+      ::RubyGem,
+      ::TestingResource,
+      ::Tool,
+      ::Tutorial,
+      ::Video
+    ]
+  end
+
+  def curation_fields
     field :experience_level, as: :select,
           enum: {
             "all_levels" => "All Levels",
@@ -76,8 +105,9 @@ class Avo::Resources::Entry < Avo::BaseResource
 
     field :published, as: :boolean,
           help: "Controls public visibility"
+  end
 
-    # Submitter information (for community submissions)
+  def submission_fields
     field :submitter_name, as: :text,
           help: "Name of person who submitted this entry (optional for admin-created entries)",
           hide_on: [ :index ]
@@ -86,7 +116,6 @@ class Avo::Resources::Entry < Avo::BaseResource
           help: "Email of submitter (required only for pending status)",
           hide_on: [ :index ]
 
-    # Tags
     field :tags, as: :tags,
           help: "Add tags to categorize this resource. Press Enter or comma to add each tag.",
           suggestions: -> {
@@ -100,10 +129,10 @@ class Avo::Resources::Entry < Avo::BaseResource
           enforce_suggestions: false,
           close_on_select: false
 
-    # Slug
     field :slug, as: :text, readonly: true, help: "Auto-generated SEO-friendly URL"
+  end
 
-    # Associations
+  def association_fields
     field :categories, as: :has_many, through: :categories_entries,
           help: "Assign multiple categories"
 
@@ -116,25 +145,23 @@ class Avo::Resources::Entry < Avo::BaseResource
           help: "Review history (latest first)",
           scope: -> { query.order(created_at: :desc) }
 
+    timestamp_fields
+  end
 
-    # Timestamps
+  def timestamp_fields
     field :created_at, as: :date_time, readonly: true, sortable: true
     field :updated_at, as: :date_time, readonly: true, hide_on: [ :index ]
   end
 
-  def filters
+  def status_filters
     filter Avo::Filters::EntryStatusFilter
     filter Avo::Filters::EntryPublishedFilter
+  end
+
+  def classification_filters
     filter Avo::Filters::EntryExperienceLevelFilter
     filter Avo::Filters::EntryTypeFilter
     filter Avo::Filters::EntryCategoryFilter
     filter Avo::Filters::EntryTagsFilter
-  end
-
-  def actions
-    action Avo::Actions::ApproveEntries
-    action Avo::Actions::RejectEntries
-    action Avo::Actions::PublishEntries
-    action Avo::Actions::UnpublishEntries
   end
 end

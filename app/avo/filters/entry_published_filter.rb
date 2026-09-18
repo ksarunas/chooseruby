@@ -1,20 +1,54 @@
 # frozen_string_literal: true
 
+# Narrows the resource list down to published or unpublished entries.
 class Avo::Filters::EntryPublishedFilter < Avo::Filters::BooleanFilter
   self.name = "Published"
 
-  def apply(request, query, value)
-    selection = value.is_a?(Hash) ? value.stringify_keys : {}
+  # Understands the two shapes Avo hands a boolean filter - a hash of ticked
+  # boxes, or a plain string - and narrows a query to the state that was
+  # asked for. Ticking both boxes, or none, narrows nothing.
+  class Selection
+    def initialize(value, attribute)
+      @value = value
+      @attribute = attribute
+    end
 
-    return query.where(published: true) if selection["true"] && !selection["false"]
-    return query.where(published: false) if selection["false"] && !selection["true"]
-    return query.where(published: true) if value == "true"
-    return query.where(published: false) if value == "false"
+    def narrow(query)
+      return query unless single?
 
-    query
+      query.where(@attribute => ticked.first == "true")
+    end
+
+    private
+
+    def single?
+      ticked.one?
+    end
+
+    def ticked
+      keys.select { |key| boxes[key] }
+    end
+
+    def keys
+      %w[true false]
+    end
+
+    def boxes
+      @value.is_a?(Hash) ? @value.stringify_keys : { @value.to_s => true }
+    end
+  end
+
+  def apply(_request, query, value)
+    Selection.new(value, attribute).narrow(query)
   end
 
   def options
     { "true" => "Published", "false" => "Unpublished" }
+  end
+
+  private
+
+  def attribute
+    :published
   end
 end

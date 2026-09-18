@@ -1,11 +1,14 @@
 # frozen_string_literal: true
 
+# Narrows the resource list down to one kind of entryable, such as a book or
+# a podcast.
 class Avo::Filters::EntryTypeFilter < Avo::Filters::SelectFilter
   self.name = "Resource Type"
 
-  def apply(request, query, value)
+  def apply(_request, query, value)
     return query if value.blank?
-    query.where(entryable_type: value)
+
+    query.where(attribute => value)
   end
 
   def options
@@ -30,5 +33,11 @@ class Avo::Filters::EntryTypeFilter < Avo::Filters::SelectFilter
       "Tutorial" => "Tutorial",
       "Video" => "Video"
     }
+  end
+
+  private
+
+  def attribute
+    :entryable_type
   end
 end

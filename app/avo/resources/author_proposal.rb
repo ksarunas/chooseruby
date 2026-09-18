@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Admin screens for the author profile changes the public forms submit for
+# review.
 class Avo::Resources::AuthorProposal < Avo::BaseResource
   self.title = :id
   self.includes = [ :author, :matched_entry ]
@@ -15,10 +17,85 @@ class Avo::Resources::AuthorProposal < Avo::BaseResource
     }
   }
 
+  # Spells out, in the words a reviewer reads, what a proposal would change
+  # about an author.
+  class ChangesSummary
+    def initialize(proposal)
+      @proposal = proposal
+    end
+
+    def to_s
+      sections.flatten.join("\n")
+    end
+
+    private
+
+    def sections
+      [ author_section, resource_section, link_section, bio_section, description_section ]
+    end
+
+    def author_section
+      return "Creating new author: #{@proposal.author_name}" if @proposal.new_author_proposal?
+
+      "Editing author: #{@proposal.author.name}"
+    end
+
+    def resource_section
+      return [] unless @proposal.has_resource_proposal?
+      return "\nResource: Unmatched URL - #{@proposal.resource_url}" unless @proposal.matched_entry?
+
+      "\nResource: Matched entry ##{@proposal.matched_entry_id} - #{@proposal.matched_entry.title}"
+    end
+
+    def link_section
+      return [] unless @proposal.has_link_updates?
+
+      [ "\nLink Updates:" ] + @proposal.link_updates.map { |link_field, url| link_line(link_field, url) }
+    end
+
+    def link_line(link_field, url)
+      current_value = @proposal.author&.public_send(link_field)
+
+      "  - #{link_field}: #{current_value.presence || '(blank)'} → #{url}"
+    end
+
+    def bio_section
+      bio = @proposal.bio_text
+      return [] if bio.blank?
+
+      [ "\nBio:", "  Current: #{@proposal.author&.bio.presence || '(blank)'}", "  Proposed: #{bio}" ]
+    end
+
+    def description_section
+      description = @proposal.description_text
+      return [] if description.blank?
+
+      [ "\nDescription:", "  Proposed: #{description}" ]
+    end
+  end
+
   def fields
+    submitter_fields
+    author_fields
+    resource_fields
+    proposed_change_fields
+    review_fields
+  end
+
+  def filters
+    filter Avo::Filters::AuthorProposalStatusFilter
+  end
+
+  def actions
+    action Avo::Actions::ApproveAuthorProposal
+    action Avo::Actions::RejectAuthorProposal
+  end
+
+  private
+
+  def submitter_fields
     field :id, as: :id, link_to_record: true
 
-    # Status and submitter information
     field :status, as: :select,
           enum: ::AuthorProposal.statuses,
           required: true,
@@ -33,8 +110,9 @@ class Avo::Resources::AuthorProposal < Avo::BaseResource
     field :submitter_name, as: :text,
           help: "Name of submitter (optional)",
           hide_on: [ :index ]
+  end
 
-    # Author associations
+  def author_fields
     field :author, as: :belongs_to,
           help: "Existing author being edited (nil for new author proposals)",
           searchable: true
@@ -43,8 +121,9 @@ class Avo::Resources::AuthorProposal < Avo::BaseResource
           help: "Name for new author (only used when creating new author)",
           hide_on: [ :index ],
           visible: -> { resource.record.new_author_proposal? }
+  end
 
-    # Resource proposal
+  def resource_fields
     field :resource_url, as: :text,
           help: "Normalized URL for resource to associate",
           hide_on: [ :index ]
@@ -58,8 +137,9 @@ class Avo::Resources::AuthorProposal < Avo::BaseResource
           class_name: "Entry",
           help: "Entry matched from resource URL (if found)",
           searchable: true
+  end
 
-    # Proposed changes
+  def proposed_change_fields
     field :link_updates, as: :code,
           readonly: true,
           language: "json",
@@ -83,8 +163,9 @@ class Avo::Resources::AuthorProposal < Avo::BaseResource
           rows: 3,
           help: "Additional notes from submitter",
           hide_on: [ :index ]
+  end
 
-    # Review information
+  def review_fields
     field :admin_comment, as: :textarea,
           readonly: true,
           rows: 3,
@@ -96,7 +177,11 @@ class Avo::Resources::AuthorProposal < Avo::BaseResource
           help: "Timestamp when proposal was reviewed",
           hide_on: [ :index ]
 
-    # Timestamps
+    timestamp_fields
+    comparison_fields
+  end
+
+  def timestamp_fields
     field :created_at, as: :date_time,
           readonly: true,
           sortable: true,
@@ -105,8 +190,9 @@ class Avo::Resources::AuthorProposal < Avo::BaseResource
     field :updated_at, as: :date_time,
           readonly: true,
           hide_on: [ :index ]
+  end
 
-    # Computed fields for comparison view
+  def comparison_fields
     field :proposal_type, as: :text,
           readonly: true,
           computed: true,
@@ -121,51 +207,7 @@ class Avo::Resources::AuthorProposal < Avo::BaseResource
           rows: 8,
           hide_on: [ :index, :edit, :new ],
           help: "Summary of proposed changes" do
-            summary = []
-
-            if record.new_author_proposal?
-              summary << "Creating new author: #{record.author_name}"
-            else
-              summary << "Editing author: #{record.author.name}"
-            end
-
-            if record.has_resource_proposal?
-              if record.matched_entry?
-                summary << "\nResource: Matched entry ##{record.matched_entry_id} - #{record.matched_entry.title}"
-              else
-                summary << "\nResource: Unmatched URL - #{record.resource_url}"
-              end
-            end
-
-            if record.has_link_updates?
-              summary << "\nLink Updates:"
-              record.link_updates.each do |link_field, url|
-                current_value = record.author&.public_send(link_field)
-                summary << "  - #{link_field}: #{current_value.presence || '(blank)'} → #{url}"
-              end
-            end
-
-            if record.bio_text.present?
-              summary << "\nBio:"
-              summary << "  Current: #{record.author&.bio.presence || '(blank)'}"
-              summary << "  Proposed: #{record.bio_text}"
-            end
-
-            if record.description_text.present?
-              summary << "\nDescription:"
-              summary << "  Proposed: #{record.description_text}"
-            end
-
-            summary.join("\n")
+            ChangesSummary.new(record).to_s
           end
-  end
-
-  def filters
-    filter Avo::Filters::AuthorProposalStatusFilter
-  end
-
-  def actions
-    action Avo::Actions::ApproveAuthorProposal
-    action Avo::Actions::RejectAuthorProposal
   end
 end

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Turns down author profile proposals in bulk, insisting on written feedback
+# and reporting the ones that could not be applied.
 class Avo::Actions::RejectAuthorProposal < Avo::BaseAction
   self.name = "Reject Proposal"
   self.message = "Are you sure you want to reject the selected proposal(s)?"
@@ -14,33 +16,11 @@ class Avo::Actions::RejectAuthorProposal < Avo::BaseAction
           required: true
   end
 
-  def handle(records:, fields:, current_user:, resource:, **args)
+  def handle(records:, fields:, **_args)
     admin_comment = fields[:admin_comment]
+    return error "Admin comment is required when rejecting proposals" if admin_comment.blank?
 
-    # Validate that admin_comment is provided
-    if admin_comment.blank?
-      error "Admin comment is required when rejecting proposals"
-      return
-    end
-
-    success_count = 0
-    error_messages = []
-
-    records.each do |proposal|
-      begin
-        # Call the reject! method with admin_comment
-        proposal.reject!(admin_comment: admin_comment)
-        success_count += 1
-      rescue StandardError => e
-        error_messages << "Proposal ##{proposal.id}: #{e.message}"
-      end
-    end
-
-    if error_messages.any?
-      error "#{success_count} rejected, #{error_messages.count} failed: #{error_messages.join('; ')}"
-    else
-      succeed "#{success_count} #{'proposal'.pluralize(success_count)} rejected successfully!"
-    end
+    reject_all(records, admin_comment)
   end
 
   # Only show this action for pending proposals
@@ -48,5 +28,36 @@ class Avo::Actions::RejectAuthorProposal < Avo::BaseAction
     return true if view == :index && !record
 
     record&.pending?
+  end
+
+  private
+
+  def noun
+    "proposal"
+  end
+
+  def reject_all(records, admin_comment)
+    failures = records.filter_map { |proposal| rejection_failure(proposal, admin_comment) }
+
+    report(records.count - failures.count, failures)
+  end
+
+  def rejection_failure(proposal, admin_comment)
+    proposal.reject!(admin_comment: admin_comment)
+    nil
+  rescue StandardError => error
+    failure_message(proposal, error)
+  end
+
+  def failure_message(proposal, error)
+    "#{noun.capitalize} ##{proposal.id}: #{error.message}"
+  end
+
+  def report(success_count, failures)
+    if failures.any?
+      error "#{success_count} rejected, #{failures.count} failed: #{failures.join('; ')}"
+    else
+      succeed "#{success_count} #{noun.pluralize(success_count)} rejected successfully!"
+    end
   end
 end
