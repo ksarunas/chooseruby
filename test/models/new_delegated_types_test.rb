@@ -31,7 +31,7 @@ class NewDelegatedTypesTest < ActiveSupport::TestCase
 
   test "Blog has display_name method that returns blog name when name exists" do
     blog = Blog.create!(name: "Rails Blog")
-    entry = Entry.create!(
+    Entry.create!(
       title: "Ruby on Rails Blog",
       url: "https://example.com/blog",
       entryable: blog,
@@ -124,7 +124,6 @@ class NewDelegatedTypesTest < ActiveSupport::TestCase
     newsletter.touch
     entry.reload
 
-    assert entry.updated_at > original_updated_at,
-           "Expected entry.updated_at (#{entry.updated_at}) to be greater than original (#{original_updated_at})"
+    assert_operator entry.updated_at, :>, original_updated_at, "Expected entry.updated_at (#{entry.updated_at}) to be greater than original (#{original_updated_at})"
   end
 end

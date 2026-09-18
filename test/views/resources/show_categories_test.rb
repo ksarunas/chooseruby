@@ -144,6 +144,6 @@ class ResourcesShowCategoriesTest < ActionDispatch::IntegrationTest
 
     # Ensure they're actual anchor tags
     category_links = css_select(".category-badges a")
-    assert category_links.length >= 2, "Should have at least 2 clickable category links"
+    assert_operator category_links.length, :>=, 2, "Should have at least 2 clickable category links"
   end
 end

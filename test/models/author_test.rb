@@ -50,14 +50,14 @@ class AuthorTest < ActiveSupport::TestCase
 
   test "should have pending status by default" do
     author = Author.create(name: "Test Author")
-    assert author.pending?, "Author should have pending status by default"
+    assert_predicate author, :pending?, "Author should have pending status by default"
     assert_equal 0, author.status_before_type_cast
   end
 
   test "should be able to change status to approved" do
     author = Author.create(name: "Test Author")
     author.approved!
-    assert author.approved?, "Author should be approved"
+    assert_predicate author, :approved?, "Author should be approved"
     assert_equal 1, author.status_before_type_cast
   end
 

@@ -44,7 +44,7 @@ class Avo::Actions::RejectAuthorProposalErrorHandlingTest < ActiveSupport::TestC
   test "reject action is visible on the index view without a record" do
     action = Avo::Actions::RejectAuthorProposal.new(record: nil, resource: nil, user: nil, view: :index)
 
-    assert action.visible?
+    assert_predicate action, :visible?
   end
 
   test "reject action is hidden on the show view without a record" do

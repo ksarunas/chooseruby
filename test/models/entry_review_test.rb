@@ -62,7 +62,7 @@ class EntryReviewTest < ActiveSupport::TestCase
     )
     review = EntryReview.create!(entry: entry, status: :approved)
 
-    assert review.approved?
+    assert_predicate review, :approved?
     assert_not review.rejected?
     assert_equal "approved", review.status
   end
@@ -75,7 +75,7 @@ class EntryReviewTest < ActiveSupport::TestCase
     )
     review = EntryReview.create!(entry: entry, status: :rejected)
 
-    assert review.rejected?
+    assert_predicate review, :rejected?
     assert_not review.approved?
     assert_equal "rejected", review.status
   end

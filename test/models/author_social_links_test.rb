@@ -21,8 +21,8 @@ class AuthorSocialLinksTest < ActiveSupport::TestCase
 
     links = author.social_links
 
-    assert_equal ALL_LINKS.values, links.map { |link| link[:url] }
-    assert_equal %w[GitHub GitLab X\ (Twitter) Bluesky LinkedIn Website Blog YouTube Twitch Ruby.social], links.map { |link| link[:name] }
+    assert_equal(ALL_LINKS.values, links.map { |link| link[:url] })
+    assert_equal(%w[GitHub GitLab X\ (Twitter) Bluesky LinkedIn Website Blog YouTube Twitch Ruby.social], links.map { |link| link[:name] })
     links.each { |link| assert_match(/\A[Mm]/, link[:icon_path]) }
   end
 
@@ -31,7 +31,7 @@ class AuthorSocialLinksTest < ActiveSupport::TestCase
 
     links = author.social_links
 
-    assert_equal [ "GitHub" ], links.map { |link| link[:name] }
+    assert_equal([ "GitHub" ], links.map { |link| link[:name] })
   end
 
   test "social_links returns an empty array when the author has no links" do

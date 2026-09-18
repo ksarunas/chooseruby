@@ -48,7 +48,7 @@ class ResourceSubmissionMailerPreview < ActionMailer::Preview
     )
 
     # Create a sample review with comment
-    review = EntryReview.new(
+    EntryReview.new(
       entry: entry,
       status: :rejected,
       comment: "Thank you for your submission. Unfortunately, this resource lacks sufficient detail and examples. We'd encourage you to expand the content and resubmit."
@@ -57,7 +57,7 @@ class ResourceSubmissionMailerPreview < ActionMailer::Preview
     # Mock the entry_reviews association to return the review
     entry.define_singleton_method(:entry_reviews) do
       Class.new do
-        def self.where(conditions)
+        def self.where(_conditions)
           self
         end
 
@@ -97,7 +97,7 @@ class ResourceSubmissionMailerPreview < ActionMailer::Preview
     # Mock the entry_reviews association to return nil comment
     entry.define_singleton_method(:entry_reviews) do
       Class.new do
-        def self.where(conditions)
+        def self.where(_conditions)
           self
         end
 

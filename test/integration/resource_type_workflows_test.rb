@@ -144,7 +144,7 @@ class ResourceTypeWorkflowsTest < ActionDispatch::IntegrationTest
 
     # 1. RubyGem
     gem = RubyGem.create!(gem_name: "metadata-gem")
-    gem_entry = Entry.create!(
+    Entry.create!(
       title: "Metadata Gem",
       url: "https://example.com/gem",
       entryable: gem,
@@ -158,7 +158,7 @@ class ResourceTypeWorkflowsTest < ActionDispatch::IntegrationTest
       publisher: "O'Reilly",
       format: "ebook"
     )
-    book_entry = Entry.create!(
+    Entry.create!(
       title: "Metadata Book",
       url: "https://example.com/book",
       entryable: book,
@@ -172,7 +172,7 @@ class ResourceTypeWorkflowsTest < ActionDispatch::IntegrationTest
       instructor: "Test Instructor",
       duration_hours: 10
     )
-    course_entry = Entry.create!(
+    Entry.create!(
       title: "Metadata Course",
       url: "https://example.com/course",
       entryable: course,
@@ -186,7 +186,7 @@ class ResourceTypeWorkflowsTest < ActionDispatch::IntegrationTest
       publication_date: Date.new(2023, 6, 1),
       reading_time_minutes: 30
     )
-    tutorial_entry = Entry.create!(
+    Entry.create!(
       title: "Metadata Tutorial",
       url: "https://example.com/tutorial",
       entryable: tutorial,
@@ -200,7 +200,7 @@ class ResourceTypeWorkflowsTest < ActionDispatch::IntegrationTest
       publication_date: Date.new(2023, 7, 1),
       reading_time_minutes: 15
     )
-    article_entry = Entry.create!(
+    Entry.create!(
       title: "Metadata Article",
       url: "https://example.com/article",
       entryable: article,
@@ -210,7 +210,7 @@ class ResourceTypeWorkflowsTest < ActionDispatch::IntegrationTest
 
     # 6. Tool
     tool = Tool.create!(tool_type: "CLI")
-    tool_entry = Entry.create!(
+    Entry.create!(
       title: "Metadata Tool",
       url: "https://example.com/tool",
       entryable: tool,
@@ -220,7 +220,7 @@ class ResourceTypeWorkflowsTest < ActionDispatch::IntegrationTest
 
     # 7. Podcast
     podcast = Podcast.create!(host: "Test Host")
-    podcast_entry = Entry.create!(
+    Entry.create!(
       title: "Metadata Podcast",
       url: "https://example.com/podcast",
       entryable: podcast,
@@ -233,7 +233,7 @@ class ResourceTypeWorkflowsTest < ActionDispatch::IntegrationTest
       platform: "Discord",
       join_url: "https://discord.gg/test"
     )
-    community_entry = Entry.create!(
+    Entry.create!(
       title: "Metadata Community",
       url: "https://example.com/community",
       entryable: community,

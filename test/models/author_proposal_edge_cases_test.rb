@@ -13,7 +13,7 @@ class AuthorProposalEdgeCasesTest < ActiveSupport::TestCase
     error = assert_raises(ArgumentError) { proposal.reject!(admin_comment: "  ") }
 
     assert_equal "admin_comment is required for rejection", error.message
-    assert proposal.reload.pending?
+    assert_predicate proposal.reload, :pending?
   end
 
   test "validation rejects unknown link fields and skips blank urls" do
@@ -53,7 +53,7 @@ class AuthorProposalEdgeCasesTest < ActiveSupport::TestCase
     error = assert_raises(ArgumentError) { proposal.approve! }
 
     assert_equal "Invalid link field: not_a_field", error.message
-    assert proposal.reload.pending?
+    assert_predicate proposal.reload, :pending?
   end
 
   test "approve! does not duplicate an existing entry association" do
@@ -69,6 +69,6 @@ class AuthorProposalEdgeCasesTest < ActiveSupport::TestCase
     assert_no_difference -> { EntriesAuthor.count } do
       proposal.approve!
     end
-    assert proposal.reload.approved?
+    assert_predicate proposal.reload, :approved?
   end
 end

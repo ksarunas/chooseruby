@@ -29,7 +29,7 @@ class ResourceTypeOrganizationIntegrationTest < ActionDispatch::IntegrationTest
       )
 
       # Create entry
-      entry = Entry.create!(
+      Entry.create!(
         title: type_info[:title],
         description: "Test #{type_info[:slug]}",
         url: "https://example.com/#{type_info[:slug]}",
@@ -121,7 +121,7 @@ class ResourceTypeOrganizationIntegrationTest < ActionDispatch::IntegrationTest
     get root_path
     assert_response :success
     assert_select "h2", text: /Newsletters/i
-    assert_match /Know a great Ruby newsletter/i, response.body
+    assert_match(/Know a great Ruby newsletter/i, response.body)
 
     # Test 3 entries - section shows with submission message
     2.times do |i|
@@ -138,7 +138,7 @@ class ResourceTypeOrganizationIntegrationTest < ActionDispatch::IntegrationTest
     get root_path
     assert_response :success
     assert_select "h2", text: /Newsletters/i
-    assert_match /Know a great Ruby newsletter/i, response.body
+    assert_match(/Know a great Ruby newsletter/i, response.body)
 
     # Test 4 entries - section shows WITHOUT submission message
     newsletter4 = Newsletter.create!(name: "Test Newsletter")
@@ -153,7 +153,7 @@ class ResourceTypeOrganizationIntegrationTest < ActionDispatch::IntegrationTest
     get root_path
     assert_response :success
     assert_select "h2", text: /Newsletters/i
-    assert_no_match /Know a great Ruby newsletter/i, response.body
+    assert_no_match(/Know a great Ruby newsletter/i, response.body)
   end
 
   # Test 7.3.4: Stats panel accuracy with multiple categories and types
@@ -249,7 +249,7 @@ class ResourceTypeOrganizationIntegrationTest < ActionDispatch::IntegrationTest
       get root_path
       assert_response :success
       # Verify submission message includes the singular form
-      assert_match /Know a great Ruby #{type_info[:expected_singular]}/i, response.body
+      assert_match(/Know a great Ruby #{type_info[:expected_singular]}/i, response.body)
       assert_select "a[href=?]", new_resource_submission_path, text: /Submit it here/i
     end
   end

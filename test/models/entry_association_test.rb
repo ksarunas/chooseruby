@@ -73,9 +73,9 @@ class EntryAssociationTest < ActiveSupport::TestCase
       status: :approved
     )
 
-    assert entry.approved?
-    refute entry.pending?
-    refute entry.rejected?
+    assert_predicate entry, :approved?
+    refute_predicate entry, :pending?
+    refute_predicate entry, :rejected?
   end
 
   test "enums work correctly for experience_level" do
@@ -86,9 +86,9 @@ class EntryAssociationTest < ActiveSupport::TestCase
       experience_level: :intermediate
     )
 
-    assert entry.intermediate?
-    refute entry.beginner?
-    refute entry.advanced?
+    assert_predicate entry, :intermediate?
+    refute_predicate entry, :beginner?
+    refute_predicate entry, :advanced?
   end
 
   test "tags serialize and deserialize as JSON array" do

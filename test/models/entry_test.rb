@@ -279,7 +279,7 @@ class EntryTest < ActiveSupport::TestCase
       published: true
     )
     assert_equal "Newsletter", newsletter_entry.entryable_type
-    assert newsletter_entry.newsletter?
+    assert_predicate newsletter_entry, :newsletter?
 
     # Test Blog
     blog = Blog.create!(name: "Ruby Blog")
@@ -292,7 +292,7 @@ class EntryTest < ActiveSupport::TestCase
       published: true
     )
     assert_equal "Blog", blog_entry.entryable_type
-    assert blog_entry.blog?
+    assert_predicate blog_entry, :blog?
 
     # Test Framework
     framework = Framework.create!(name: "Test Framework")
@@ -305,7 +305,7 @@ class EntryTest < ActiveSupport::TestCase
       published: true
     )
     assert_equal "Framework", framework_entry.entryable_type
-    assert framework_entry.framework?
+    assert_predicate framework_entry, :framework?
   end
 
   test "new type scopes return correct entries" do

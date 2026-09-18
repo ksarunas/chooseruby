@@ -21,7 +21,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
       email_address: "admin@test.com",
       password: "password"
     }
-    assert cookies[:session_token].present?
+    assert_predicate cookies[:session_token], :present?
   end
 
   test "POST create with invalid email shows error" do
@@ -57,7 +57,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
       email_address: "admin@test.com",
       password: "password"
     }
-    assert cookies[:session_token].present?
+    assert_predicate cookies[:session_token], :present?
 
     # Then logout
     delete session_url

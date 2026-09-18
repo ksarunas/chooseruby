@@ -4,12 +4,58 @@
 # Omakase Ruby styling for Rails
 inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 
+# Harden the Omakase baseline with additional cops (see GitHub issue #46)
+plugins:
+  - rubocop-minitest
+  - rubocop-thread_safety
+
 # Overwrite or add rules to create your own house style
 #
 # # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
 # Layout/SpaceInsideArrayLiteralBrackets:
 #   Enabled: false
 
+AllCops:
+  NewCops: enable
+
 Style/FrozenStringLiteralComment:
   Enabled: true
   EnforcedStyle: always_true
+
+# Omakase disables Lint entirely; re-enable it so unused variables/arguments,
+# unreachable code, and other correctness issues are caught.
+Lint:
+  Enabled: true
+
+# Omakase disables Security entirely; re-enable it to catch unsafe eval,
+# YAML.load, open, and similar risky calls.
+Security:
+  Enabled: true
+
+# Catch cops flagging non-thread-safe patterns (mutable class-level state, etc).
+ThreadSafety:
+  Enabled: true
+
+# This module is a lookup cache used only by the single-run, single-threaded
+# rubyandrailsinfo data import/seed pipeline (never concurrent request code),
+# so the shared class-instance-variable state it flags is not a real risk here.
+# The lookup hashes are also mutated in place by register_* below, so freezing
+# them (MutableClassInstanceVariable's autocorrect) would break that at runtime.
+ThreadSafety/ClassInstanceVariable:
+  Exclude:
+    - "lib/imports/rubyandrailsinfo/helpers.rb"
+ThreadSafety/MutableClassInstanceVariable:
+  Exclude:
+    - "lib/imports/rubyandrailsinfo/helpers.rb"
+
+# Catch Minitest-specific style/correctness issues (assert_not over refute, etc).
+Minitest:
+  Enabled: true
+
+# Purely stylistic/metrics-like cops that would require rewriting most of the
+# existing test suite for no correctness benefit; keep the rest of the
+# Minitest department enabled.
+Minitest/MultipleAssertions:
+  Enabled: false
+Minitest/EmptyLineBeforeAssertionMethods:
+  Enabled: false

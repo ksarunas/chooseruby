@@ -152,7 +152,7 @@ class EntryDirectoryQueryTest < ActiveSupport::TestCase
     )
 
     gem_low = RubyGem.create!(gem_name: "other-gem", rubygems_url: "https://rubygems.org/gems/other-gem")
-    low_relevance = Entry.create!(
+    Entry.create!(
       title: "Other Gem",
       description: "This mentions Ruby once",
       url: "https://example.com/low",

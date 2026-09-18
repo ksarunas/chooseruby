@@ -17,7 +17,7 @@ class ResourceTypesControllerTest < ActionDispatch::IntegrationTest
   # Test 3.1.2: Type browse page filters entries by type
   test "GET type browse page filters entries by type" do
     # Create entries of different types
-    gem_entry = Entry.create!(
+    Entry.create!(
       title: "RSpec Testing Framework",
       url: "https://rspec.info",
       description: "BDD testing framework",
@@ -27,7 +27,7 @@ class ResourceTypesControllerTest < ActionDispatch::IntegrationTest
       submitter_email: "test@example.com"
     )
 
-    book_entry = Entry.create!(
+    Entry.create!(
       title: "The Well-Grounded Rubyist",
       url: "https://manning.com/books/well-grounded-rubyist",
       description: "Comprehensive Ruby guide",
@@ -86,7 +86,7 @@ class ResourceTypesControllerTest < ActionDispatch::IntegrationTest
   # Test 3.1.4: Type browse page works with level filter
   test "GET type browse page works with level filter" do
     # Create gem entries with different experience levels
-    beginner_gem = Entry.create!(
+    Entry.create!(
       title: "Learn Ruby the Hard Way",
       url: "https://learnrubythehardway.org",
       description: "Beginner Ruby tutorial",
@@ -97,7 +97,7 @@ class ResourceTypesControllerTest < ActionDispatch::IntegrationTest
       submitter_email: "test@example.com"
     )
 
-    advanced_gem = Entry.create!(
+    Entry.create!(
       title: "Metaprogramming Ruby",
       url: "https://pragprog.com/titles/ppmetr2",
       description: "Advanced Ruby techniques",
@@ -178,7 +178,7 @@ class ResourceTypesControllerTest < ActionDispatch::IntegrationTest
   # Test 3.1.8: Type browse page works with search query
   test "GET type browse page works with search query" do
     # Create gem entries with different content
-    rspec_gem = Entry.create!(
+    Entry.create!(
       title: "RSpec Testing Framework",
       url: "https://rspec.info",
       description: "BDD testing framework for Ruby",
@@ -188,7 +188,7 @@ class ResourceTypesControllerTest < ActionDispatch::IntegrationTest
       submitter_email: "test@example.com"
     )
 
-    rails_gem = Entry.create!(
+    Entry.create!(
       title: "Ruby on Rails",
       url: "https://rubyonrails.org",
       description: "Full-stack web framework",
@@ -349,7 +349,7 @@ class ResourceTypesControllerTest < ActionDispatch::IntegrationTest
     # Newer featured entry should appear before older featured entry in response body
     newer_position = response.body.index("Newer Featured Gem")
     older_position = response.body.index("Older Featured Gem")
-    assert newer_position < older_position, "Newer featured entry should appear before older featured entry"
+    assert_operator newer_position, :<, older_position, "Newer featured entry should appear before older featured entry"
   end
 
   # Test 5.1.5: Stats panel shows correct category counts for specific type

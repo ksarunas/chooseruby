@@ -63,7 +63,7 @@ class AuthorProposalWorkflowTest < ActionDispatch::IntegrationTest
   # ========================================
   # Tests the complete workflow of proposing and creating a new author
   test "anonymous user proposes new author, admin approves, new author is created" do
-    initial_author_count = Author.count
+    Author.count
 
     # Step 1: User submits new author proposal
     post author_proposals_path, params: {
@@ -133,7 +133,7 @@ class AuthorProposalWorkflowTest < ActionDispatch::IntegrationTest
 
     # Step 2: Verify URL was matched to entry
     assert_equal entry.id, proposal.matched_entry_id, "Should match entry despite URL variations"
-    assert proposal.matched_entry?, "matched_entry? should return true"
+    assert_predicate proposal, :matched_entry?, "matched_entry? should return true"
 
     # Step 3: Admin approves proposal
     assert_difference "EntriesAuthor.count", 1 do

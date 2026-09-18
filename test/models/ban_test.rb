@@ -52,12 +52,12 @@ class BanTest < ActiveSupport::TestCase
   # active? tests
   test "should be active when expires_at is nil" do
     ban = Ban.create!(ip_address: "192.168.1.100", reason: "Test ban", expires_at: nil)
-    assert ban.active?, "Ban with nil expires_at should be active"
+    assert_predicate ban, :active?, "Ban with nil expires_at should be active"
   end
 
   test "should be active when expires_at is in the future" do
     ban = Ban.create!(ip_address: "192.168.1.100", reason: "Test ban", expires_at: 1.day.from_now)
-    assert ban.active?, "Ban with future expires_at should be active"
+    assert_predicate ban, :active?, "Ban with future expires_at should be active"
   end
 
   test "should not be active when expires_at is in the past" do
@@ -68,7 +68,7 @@ class BanTest < ActiveSupport::TestCase
   # expired? tests
   test "should be expired when expires_at is in the past" do
     ban = Ban.create!(ip_address: "192.168.1.100", reason: "Test ban", expires_at: 1.day.ago)
-    assert ban.expired?, "Ban with past expires_at should be expired"
+    assert_predicate ban, :expired?, "Ban with past expires_at should be expired"
   end
 
   test "should not be expired when active" do
@@ -105,7 +105,7 @@ class BanTest < ActiveSupport::TestCase
   # Cascade delete test
   test "should be destroyed when user is destroyed" do
     user = User.create!(email_address: "test@example.com", name: "Test User", password: "password123")
-    ban = user.bans.create!(reason: "Test ban")
+    user.bans.create!(reason: "Test ban")
 
     assert_difference "Ban.count", -1 do
       user.destroy

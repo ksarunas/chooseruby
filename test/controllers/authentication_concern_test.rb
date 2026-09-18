@@ -76,7 +76,7 @@ class AuthenticationConcernSessionLookupTest < ActionDispatch::IntegrationTest
     delete session_url
 
     assert_redirected_to root_path
-    assert cookies[:session_token].blank?
+    assert_predicate cookies[:session_token], :blank?
   end
 
   private

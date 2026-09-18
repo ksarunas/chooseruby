@@ -9,7 +9,7 @@ class SpamProtectionTest < ActionDispatch::IntegrationTest
   end
 
   test "rack attack middleware is loaded" do
-    assert Rails.application.config.middleware.include?(Rack::Attack), "Rack::Attack middleware should be loaded"
+    assert_includes Rails.application.config.middleware, Rack::Attack, "Rack::Attack middleware should be loaded"
   end
 
   test "rack attack cache store is configured" do
@@ -67,7 +67,7 @@ class SpamProtectionTest < ActionDispatch::IntegrationTest
   test "active hashcash difficulty bits is set to appropriate level" do
     # Verify difficulty level is set (should be between 12-16 for forms)
     assert_not_nil ActiveHashcash.bits, "ActiveHashcash.bits should be configured"
-    assert ActiveHashcash.bits >= 10, "Difficulty should be at least 10 bits"
-    assert ActiveHashcash.bits <= 20, "Difficulty should be at most 20 bits"
+    assert_operator ActiveHashcash.bits, :>=, 10, "Difficulty should be at least 10 bits"
+    assert_operator ActiveHashcash.bits, :<=, 20, "Difficulty should be at most 20 bits"
   end
 end

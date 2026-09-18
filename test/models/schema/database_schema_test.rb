@@ -23,7 +23,7 @@ class DatabaseSchemaTest < ActiveSupport::TestCase
     )
 
     join_record = CategoriesEntry.create!(category: category, entry: entry)
-    assert join_record.persisted?
+    assert_predicate join_record, :persisted?
 
     # Test cascade delete when category is deleted
     category.destroy

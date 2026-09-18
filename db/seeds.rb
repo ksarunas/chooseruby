@@ -37,14 +37,14 @@ if ENV['IMPORT_RUBYANDRAILSINFO'] == 'true' && File.exist?(Rails.root.join('tmp/
   ]
 
   seed_files.each do |seed_file|
-    puts "\n" + "="*80
+    puts "\n" + ("="*80)
     puts "Running: seeds/rubyandrailsinfo/#{seed_file}.rb"
     puts "="*80
     load Rails.root.join('db', 'seeds', 'rubyandrailsinfo', "#{seed_file}.rb")
   end
 
   # Verification
-  puts "\n" + "="*80
+  puts "\n" + ("="*80)
   puts "Import Complete - Verification Summary"
   puts "="*80
   puts "Categories: #{Category.count}"

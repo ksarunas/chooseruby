@@ -119,7 +119,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
       bio_text: "New bio",
       submitter_email: "test@example.com"
     )
-    assert proposal.pending?, "Proposal should have pending status by default"
+    assert_predicate proposal, :pending?, "Proposal should have pending status by default"
     assert_equal 0, proposal.status_before_type_cast
   end
 
@@ -130,7 +130,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
       submitter_email: "test@example.com"
     )
     proposal.update(status: :approved, reviewed_at: Time.current)
-    assert proposal.approved?, "Proposal should be approved"
+    assert_predicate proposal, :approved?, "Proposal should be approved"
     assert_equal 1, proposal.status_before_type_cast
   end
 
@@ -141,7 +141,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
       submitter_email: "test@example.com"
     )
     proposal.update(status: :rejected, reviewed_at: Time.current, admin_comment: "Rejected")
-    assert proposal.rejected?, "Proposal should be rejected"
+    assert_predicate proposal, :rejected?, "Proposal should be rejected"
     assert_equal 2, proposal.status_before_type_cast
   end
 
@@ -186,7 +186,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
       bio_text: "First proposal",
       submitter_email: "test@example.com"
     )
-    assert proposal1.persisted?, "First proposal should be saved"
+    assert_predicate proposal1, :persisted?, "First proposal should be saved"
 
     proposal2 = AuthorProposal.new(
       author: @author,
@@ -198,7 +198,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
   end
 
   test "should allow proposal after 24 hours" do
-    proposal1 = AuthorProposal.create(
+    AuthorProposal.create(
       author: @author,
       bio_text: "First proposal",
       submitter_email: "test@example.com",
@@ -214,7 +214,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
   end
 
   test "should allow multiple proposals from different emails" do
-    proposal1 = AuthorProposal.create(
+    AuthorProposal.create(
       author: @author,
       bio_text: "First proposal",
       submitter_email: "test1@example.com"
@@ -317,7 +317,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
       proposal.approve!
     end
 
-    assert proposal.approved?
+    assert_predicate proposal, :approved?
     assert_not_nil proposal.reviewed_at
   end
 
@@ -345,7 +345,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
 
     entries_author = EntriesAuthor.find_by(author: @author, entry: entry)
     assert_not_nil entries_author, "EntriesAuthor association should be created"
-    assert proposal.approved?
+    assert_predicate proposal, :approved?
   end
 
   # Test 2.1.3: approve! applies link_updates to Author
@@ -364,7 +364,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
     @author.reload
     assert_equal "https://github.com/matz", @author.github_url
     assert_equal "https://twitter.com/yukihiro_matz", @author.twitter_url
-    assert proposal.approved?
+    assert_predicate proposal, :approved?
   end
 
   # Test 2.1.4: approve! transaction rollback on failure
@@ -383,7 +383,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
     end
 
     proposal.reload
-    assert proposal.pending?, "Proposal should remain pending after failed approval"
+    assert_predicate proposal, :pending?, "Proposal should remain pending after failed approval"
     assert_nil proposal.reviewed_at, "reviewed_at should not be set on failed approval"
     assert_equal 0, Author.where(name: "X").count, "No author should be created on rollback"
   end
@@ -399,7 +399,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
     freeze_time do
       proposal.reject!(admin_comment: "Bio needs more detail")
 
-      assert proposal.rejected?
+      assert_predicate proposal, :rejected?
       assert_equal "Bio needs more detail", proposal.admin_comment
       assert_equal Time.current, proposal.reviewed_at
     end
@@ -416,7 +416,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
       proposal.reject!
     end
 
-    assert proposal.pending?, "Proposal should remain pending without admin_comment"
+    assert_predicate proposal, :pending?, "Proposal should remain pending without admin_comment"
   end
 
   # Test 2.1.6: New author creation flow via approve!
@@ -445,7 +445,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
     assert_equal "Creator of Ruby on Rails", new_author.bio
     assert_equal "https://github.com/dhh", new_author.github_url
     assert_equal "https://twitter.com/dhh", new_author.twitter_url
-    assert proposal.approved?
+    assert_predicate proposal, :approved?
   end
 
   # ========================================
@@ -459,7 +459,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
       bio_text: "Bio",
       submitter_email: "test@example.com"
     )
-    assert proposal.new_author_proposal?
+    assert_predicate proposal, :new_author_proposal?
   end
 
   test "new_author_proposal? should return false when author_id is present" do
@@ -477,7 +477,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
       bio_text: "Bio",
       submitter_email: "test@example.com"
     )
-    assert proposal.existing_author_proposal?
+    assert_predicate proposal, :existing_author_proposal?
   end
 
   test "existing_author_proposal? should return false when author_id is nil" do
@@ -496,7 +496,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
       resource_url: "https://example.com",
       submitter_email: "test@example.com"
     )
-    assert proposal.has_resource_proposal?
+    assert_predicate proposal, :has_resource_proposal?
   end
 
   test "has_resource_proposal? should return false when resource_url is blank" do
@@ -514,7 +514,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
       link_updates: { "github_url" => "https://github.com/test" },
       submitter_email: "test@example.com"
     )
-    assert proposal.has_link_updates?
+    assert_predicate proposal, :has_link_updates?
   end
 
   test "has_link_updates? should return false when link_updates is blank" do
@@ -532,14 +532,14 @@ class AuthorProposalTest < ActiveSupport::TestCase
       bio_text: "Bio",
       submitter_email: "test@example.com"
     )
-    assert proposal1.has_bio_changes?
+    assert_predicate proposal1, :has_bio_changes?
 
     proposal2 = AuthorProposal.new(
       author: @author,
       description_text: "Description",
       submitter_email: "test2@example.com"
     )
-    assert proposal2.has_bio_changes?
+    assert_predicate proposal2, :has_bio_changes?
 
     proposal3 = AuthorProposal.new(
       author: @author,
@@ -547,7 +547,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
       description_text: "Description",
       submitter_email: "test3@example.com"
     )
-    assert proposal3.has_bio_changes?
+    assert_predicate proposal3, :has_bio_changes?
   end
 
   test "has_bio_changes? should return false when bio_text and description_text are blank" do
@@ -560,7 +560,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
   end
 
   test "matched_entry? should return true when matched_entry_id is present" do
-    entry = Entry.create!(
+    Entry.create!(
       title: "Test Entry",
       url: "https://example.com",
       status: :approved,
@@ -574,7 +574,7 @@ class AuthorProposalTest < ActiveSupport::TestCase
       submitter_email: "test@example.com"
     )
 
-    assert proposal.matched_entry?
+    assert_predicate proposal, :matched_entry?
   end
 
   test "matched_entry? should return false when matched_entry_id is nil" do

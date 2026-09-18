@@ -22,7 +22,7 @@ class Avo::Actions::ApproveAuthorProposalErrorHandlingTest < ActiveSupport::Test
   test "approve action is visible on the index view without a record" do
     action = Avo::Actions::ApproveAuthorProposal.new(record: nil, resource: nil, user: nil, view: :index)
 
-    assert action.visible?
+    assert_predicate action, :visible?
   end
 
   test "approve action is hidden on the show view without a record" do

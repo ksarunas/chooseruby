@@ -29,8 +29,8 @@ class AdminUserCreatorTest < ActiveSupport::TestCase
 
     user = User.find_by!(email_address: "new-admin@example.com")
     assert_equal "New Admin", user.name
-    assert user.admin?
-    assert user.active?
+    assert_predicate user, :admin?
+    assert_predicate user, :active?
     assert user.authenticate("secret123")
     assert_includes @output.string, "Email address: Name: Password: \nConfirm password: \n"
     assert_includes @output.string, "Successfully created admin user: New Admin\nEmail: new-admin@example.com\n"

@@ -11,7 +11,7 @@ class AuthorsController::SearchTest < ActionDispatch::IntegrationTest
       github_url: "https://github.com/matz"
     )
 
-    pending_author = Author.create!(
+    Author.create!(
       name: "Yukihiro Pending",
       status: :pending
     )

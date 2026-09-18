@@ -19,8 +19,8 @@ class UserBannableTest < ActiveSupport::TestCase
     assert_equal "Spam", ban.reason
     assert_equal "10.0.0.1", ban.ip_address
     assert_in_delta expires_at, ban.expires_at, 1.second
-    assert @user.suspended?
-    assert @user.banned?
+    assert_predicate @user, :suspended?
+    assert_predicate @user, :banned?
     assert_equal 0, @user.sessions.count
   end
 
@@ -30,9 +30,9 @@ class UserBannableTest < ActiveSupport::TestCase
 
     user.unban!
 
-    assert user.active?
+    assert_predicate user, :active?
     assert_not user.banned?
-    assert active_ban.reload.expires_at <= Time.current
+    assert_operator active_ban.reload.expires_at, :<=, Time.current
     assert_empty user.bans.active
   end
 

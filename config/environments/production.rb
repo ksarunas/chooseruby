@@ -71,7 +71,7 @@ Rails.application.configure do
  #   authentication: :plain
  # }
 
- if smtp_address = ENV["SMTP_ADDRESS"].presence
+ if (smtp_address = ENV["SMTP_ADDRESS"].presence)
     config.action_mailer.delivery_method = :smtp
     config.action_mailer.smtp_settings = {
       address: smtp_address,

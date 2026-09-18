@@ -27,7 +27,7 @@ class Avo::Filters::EntryFiltersTest < ActiveSupport::TestCase
     filter = Avo::Filters::EntryPublishedFilter.new
 
     assert_equal [ @approved ], filter.apply(nil, Entry.all, { "true" => true }).to_a
-    assert_equal [ @pending, @rejected ], filter.apply(nil, Entry.all, { false: true }).order(:id).to_a
+    assert_equal [ @pending, @rejected ], filter.apply(nil, Entry.all, { false => true }).order(:id).to_a
     assert_equal 3, filter.apply(nil, Entry.all, { "true" => true, "false" => true }).count
     assert_equal [ @approved ], filter.apply(nil, Entry.all, "true").to_a
     assert_equal [ @pending, @rejected ], filter.apply(nil, Entry.all, "false").order(:id).to_a

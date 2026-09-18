@@ -52,7 +52,7 @@ module Imports
         output = run_import("authors" => [ author_yaml ])
 
         author = Author.find_by!(slug: "imported-author")
-        assert author.approved?
+        assert_predicate author, :approved?
         assert_equal "https://twitter.com/imported", author.twitter_url
         assert_equal "https://github.com/imported", author.github_url
         assert_equal "https://imported.example", author.website_url
@@ -84,14 +84,14 @@ module Imports
         assert_equal 2020, book.publication_year
         assert_equal 300, book.page_count
         assert_equal "https://amazon.com/imported-book", book.purchase_url
-        assert book.both?
+        assert_predicate book, :both?
         entry = book.entry
         assert_equal "Imported Book", entry.title
         assert_equal "About it", entry.description.to_plain_text
         assert_equal "https://book.example", entry.url
-        assert entry.approved?
-        assert entry.published?
-        assert entry.intermediate?
+        assert_predicate entry, :approved?
+        assert_predicate entry, :published?
+        assert_predicate entry, :intermediate?
         assert_equal Time.parse(TIMESTAMPS["created_at"]), entry.featured_at
         assert_includes output, "✓ Imported 1 books (0 errors, 0 skipped)"
       end
@@ -233,7 +233,7 @@ module Imports
         assert_equal "https://www.youtube.com/watch?v=MwbmKqdDsyI", Entry.find_by!(slug: "lesson-one").url
         assert_equal "https://vimeo.com/2", Entry.find_by!(slug: "lesson-two").url
         assert_equal "https://lesson.example/3", Entry.find_by!(slug: "lesson-three").url
-        assert Entry.find_by!(slug: "lesson-one").all_levels?
+        assert_predicate Entry.find_by!(slug: "lesson-one"), :all_levels?
         assert_includes output, "✗ Error importing lesson 5"
         assert_includes output, "✓ Imported 3 lessons (1 errors, 1 skipped)"
       end
@@ -286,7 +286,7 @@ module Imports
         entry = Entry.find_by!(slug: "imported-podcast")
         primary = entry.categories_entries.find_by!(is_primary: true)
         assert_equal "imported-primary", primary.category.slug
-        assert_equal [ "imported-secondary" ], entry.categories_entries.where(is_primary: false).map { |ce| ce.category.slug }
+        assert_equal([ "imported-secondary" ], entry.categories_entries.where(is_primary: false).map { |ce| ce.category.slug })
         assert_includes output, "✓ Imported 2 taggings (0 errors, 2 skipped)"
       end
 
