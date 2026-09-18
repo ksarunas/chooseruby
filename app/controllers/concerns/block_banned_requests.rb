@@ -21,6 +21,6 @@ module BlockBannedRequests
   end
 
   def banned_user?
-    Current.user&.banned?
+    current_user&.banned?
   end
 end

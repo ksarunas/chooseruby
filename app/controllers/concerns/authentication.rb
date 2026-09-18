@@ -7,6 +7,8 @@ module Authentication
   include Authentication::SessionLookup
 
   included do
+    delegate :user, to: :Current, prefix: :current
+
     before_action :set_current_user
     helper_method :current_user, :authenticated?
   end
@@ -18,10 +20,6 @@ module Authentication
       Current.user = session.user
       Current.session = session
     end
-  end
-
-  def current_user
-    Current.user
   end
 
   def authenticated?

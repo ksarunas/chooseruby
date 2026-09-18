@@ -35,17 +35,9 @@ class AuthorProposalsController < ApplicationController
   def create
     @author_proposal = AuthorProposal.new(author_proposal_params)
 
-    if @author_proposal.save
-      redirect_to author_proposal_success_path(@author_proposal)
-    else
-      # Reload author for existing author proposals to display form correctly
-      if @author_proposal.author_id.present?
-        @author = Author.find_by(id: @author_proposal.author_id)
-        render :new, status: :unprocessable_entity
-      else
-        render :new_author, status: :unprocessable_entity
-      end
-    end
+    return redirect_to author_proposal_success_path(@author_proposal) if @author_proposal.save
+
+    render_proposal_form
   end
 
   # Display success confirmation page
@@ -59,8 +51,25 @@ class AuthorProposalsController < ApplicationController
   private
 
   # Strong parameters for author proposal
+  # Redisplays the form the proposal came from, reloading the author it concerns
+  # so the fields can be shown again.
+  def render_proposal_form
+    proposed_author_id = @author_proposal.author_id
+    return render :new_author, status: :unprocessable_entity if proposed_author_id.blank?
+
+    @author = Author.find_by(id: proposed_author_id)
+    render :new, status: :unprocessable_entity
+  end
+
   def author_proposal_params
-    params.require(:author_proposal).permit(
+    permitted = params.require(:author_proposal).permit(*permitted_proposal_keys)
+    permitted[:link_updates] = AuthorProposal::ProposedLinks.from_form(permitted[:link_updates])
+
+    permitted
+  end
+
+  def permitted_proposal_keys
+    [
       :author_id,
       :author_name,
       :resource_url,
@@ -69,7 +78,7 @@ class AuthorProposalsController < ApplicationController
       :submitter_name,
       :submitter_email,
       :submission_notes,
-      link_updates: [
+      { link_updates: [
         :github_url,
         :gitlab_url,
         :website_url,
@@ -80,13 +89,7 @@ class AuthorProposalsController < ApplicationController
         :youtube_url,
         :twitch_url,
         :blog_url
-      ]
-    ).tap do |permitted|
-      # Convert link_updates array to hash, removing blank values
-      if permitted[:link_updates].present?
-        link_hash = permitted[:link_updates].to_h.reject { |_k, v| v.blank? }
-        permitted[:link_updates] = link_hash.presence
-      end
-    end
+      ] }
+    ]
   end
 end

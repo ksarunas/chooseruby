@@ -10,6 +10,11 @@ class AuthorProposal::ProposedLinks
 
   HTTP_URL = URI::DEFAULT_PARSER.make_regexp(%w[http https])
 
+  # The form submits a value for every link field; keep only the filled ones.
+  def self.from_form(submitted)
+    submitted.to_h.reject { |_field, url| url.blank? }.presence
+  end
+
   def initialize(link_updates)
     @link_updates = link_updates.to_h
   end

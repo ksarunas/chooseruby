@@ -30,6 +30,14 @@ class Session < ApplicationRecord
   before_create :generate_token
   before_create :set_last_active
 
+  # Keeps the session alive and returns it, or nothing once it has expired.
+  def refresh
+    return if expired?
+
+    touch_last_active
+    self
+  end
+
   def touch_last_active
     update(last_active_at: Time.current)
   end
