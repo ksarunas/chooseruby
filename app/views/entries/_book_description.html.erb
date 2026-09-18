@@ -18,7 +18,7 @@
           <div class="flex items-center gap-2">
             <span class="text-sm text-slate-500">Skill level:</span>
             <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-1.5 text-sm font-semibold text-slate-700">
-              <span class="h-2.5 w-2.5 rounded-full <%= experience_level_badge_color(entry.experience_level) %>"></span>
+              <span class="h-2.5 w-2.5 rounded-full <%= ExperienceLevel[entry.experience_level].badge_color %>"></span>
               <%= entry.experience_level.humanize %>
             </span>
           </div>

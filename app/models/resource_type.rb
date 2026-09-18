@@ -1,8 +1,15 @@
 # frozen_string_literal: true
 
-module ResourceTypeHelper
-  # Type metadata mapping
-  TYPE_METADATA = {
+# A kind of resource in the directory, such as gems or books, identified by the
+# slug that appears in directory URLs.
+#
+# Knows how it should be introduced to a reader: its display name, its emoji,
+# the subtitle of its browse page and the message inviting a submission.
+#
+#   ResourceType["gems"].name  # => "Ruby Gems"
+#   ResourceType["gems"].emoji # => "\u{1F48E}"
+class ResourceType
+  METADATA = {
     "gems" => {
       name: "Ruby Gems",
       emoji: "💎",
@@ -111,70 +118,43 @@ module ResourceTypeHelper
     }
   }.freeze
 
-  # Returns human-readable name for a type
-  # @param type [String] the type slug (e.g., "gems", "books")
-  # @return [String] the human-readable name (e.g., "Ruby Gems", "Books")
-  #
-  # Example:
-  #   type_name("gems") # => "Ruby Gems"
-  #   type_name("books") # => "Books"
-  def type_name(type)
-    TYPE_METADATA.dig(type, :name) || type.titleize
+  # Slugs whose singular form Rails cannot work out on its own.
+  IRREGULAR_SINGULARS = {
+    "testing-resources" => "testing resource",
+    "development-environments" => "development environment",
+    "documentations" => "documentation",
+    "job-boards" => "job board"
+  }.freeze
+
+  DEFAULT_EMOJI = "\u{1F4E6}"
+
+  def self.[](slug)
+    new(slug)
   end
 
-  # Returns emoji for a type
-  # @param type [String] the type slug (e.g., "gems", "books")
-  # @return [String] the emoji for the type (e.g., "💎", "📚")
-  #
-  # Example:
-  #   type_emoji("gems") # => "💎"
-  #   type_emoji("books") # => "📚"
-  def type_emoji(type)
-    TYPE_METADATA.dig(type, :emoji) || "📦"
+  def initialize(slug)
+    @slug = slug
   end
 
-  # Returns description/subtitle text for a type browse page
-  # @param type [String] the type slug (e.g., "gems", "books")
-  # @return [String] the description text
-  #
-  # Example:
-  #   type_description("gems") # => "curated gems for your Ruby projects"
-  #   type_description("books") # => "curated books to master Ruby and Rails"
-  def type_description(type)
-    TYPE_METADATA.dig(type, :description) || "curated #{type} for Ruby developers"
+  def name
+    METADATA.dig(@slug, :name) || @slug.titleize
   end
 
-  # Task 3.13: Returns type-specific submission encouragement message
-  # @param type [String] the type slug (e.g., "newsletters", "videos")
-  # @return [String] the submission message with link
-  #
-  # Example:
-  #   submission_message_for_type("newsletters") # => "Know a great Ruby newsletter? Submit it here"
-  #   submission_message_for_type("videos") # => "Know a great Ruby video? Submit it here"
-  def submission_message_for_type(type)
-    singular_name = singularize_type_name(type)
+  def emoji
+    METADATA.dig(@slug, :emoji) || DEFAULT_EMOJI
+  end
+
+  def description
+    METADATA.dig(@slug, :description) || "curated #{@slug} for Ruby developers"
+  end
+
+  def submission_message
     "Know a great Ruby #{singular_name}? Submit it here"
   end
 
   private
 
-  # Converts type slug to singular form for natural language
-  # @param type [String] the type slug (e.g., "newsletters", "testing-resources")
-  # @return [String] the singular form (e.g., "newsletter", "testing resource")
-  def singularize_type_name(type)
-    # Handle special cases for multi-word types
-    case type
-    when "testing-resources"
-      "testing resource"
-    when "development-environments"
-      "development environment"
-    when "documentations"
-      "documentation"
-    when "job-boards"
-      "job board"
-    else
-      # Remove hyphens and singularize
-      type.tr("-", " ").singularize
-    end
+  def singular_name
+    IRREGULAR_SINGULARS[@slug] || @slug.tr("-", " ").singularize
   end
 end

@@ -39,7 +39,7 @@ class EntriesController < ApplicationController
 
     @categories = Category.where("name LIKE ?", "%#{sanitized_query}%").order(:name).limit(5)
     @types = Entry::VALID_TYPES.keys.filter do |type_slug|
-      view_context.type_name(type_slug).downcase.include?(@query.downcase)
+      ResourceType[type_slug].name.downcase.include?(@query.downcase)
     end.first(4)
     @entries = Entry.visible
       .where("title LIKE ?", "%#{sanitized_query}%")

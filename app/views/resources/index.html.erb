@@ -40,7 +40,7 @@
           <div class="space-y-2">
             <%= form.label :type, "Resource Type", class: "text-sm font-semibold text-slate-700" %>
             <%= form.select :type,
-                            options_for_select([["All types", nil]] + Entry::VALID_TYPES.keys.map { |type_key| [type_name(type_key), type_key] }, @active_type),
+                            options_for_select([["All types", nil]] + Entry::VALID_TYPES.keys.map { |type_key| [ResourceType[type_key].name, type_key] }, @active_type),
                             {},
                             class: "w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 shadow-sm transition focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-300" %>
           </div>

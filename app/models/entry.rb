@@ -146,6 +146,12 @@ class Entry < ApplicationRecord
 
   # Enums
   enum :experience_level, { beginner: 0, intermediate: 1, advanced: 2, all_levels: 3 }
+
+  # The experience levels an author picks between when submitting. "all_levels"
+  # is implied by the others rather than chosen.
+  def self.selectable_experience_levels
+    experience_levels.keys - [ "all_levels" ]
+  end
   enum :status, { pending: 0, approved: 1, rejected: 2 }, default: :pending
 
   # Validations

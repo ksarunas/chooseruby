@@ -38,7 +38,7 @@
             <% end %>
 
             <%# Social Links %>
-            <% social_links = author_social_links(author) %>
+            <% social_links = author.social_links %>
             <% if social_links.any? %>
               <div class="flex flex-wrap gap-2">
                 <% social_links.each do |link| %>

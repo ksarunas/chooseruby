@@ -36,7 +36,7 @@
       { text: "Resources", url: entries_path }
     ]
     if @entry.type_slug.present?
-      breadcrumb_items << { text: type_name(@entry.type_slug), url: entries_path(type: @entry.type_slug) }
+      breadcrumb_items << { text: ResourceType[@entry.type_slug].name, url: entries_path(type: @entry.type_slug) }
     end
     breadcrumb_items << { text: @entry.title, url: nil }
   %>
@@ -90,7 +90,7 @@
           <!-- Experience Level Badge -->
           <% if @entry.experience_level.present? %>
             <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-              <span class="h-2 w-2 rounded-full <%= experience_level_badge_color(@entry.experience_level) %>"></span>
+              <span class="h-2 w-2 rounded-full <%= ExperienceLevel[@entry.experience_level].badge_color %>"></span>
               <%= @entry.experience_level.capitalize %>
             </span>
           <% end %>

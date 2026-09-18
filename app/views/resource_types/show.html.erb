@@ -1,15 +1,15 @@
-<% content_for :title, "#{type_name(@type)} Directory | ChooseRuby" %>
-<% content_for :meta_description, "Explore curated #{type_name(@type).downcase} for Ruby on Rails. Filter by category or experience level to find the perfect resource for your next project." %>
+<% content_for :title, "#{ResourceType[@type].name} Directory | ChooseRuby" %>
+<% content_for :meta_description, "Explore curated #{ResourceType[@type].name.downcase} for Ruby on Rails. Filter by category or experience level to find the perfect resource for your next project." %>
 
 <div class="space-y-12 pb-16">
   <!-- Directory hero -->
   <section class="rounded-3xl bg-white p-8 shadow-sm ring-1 ring-slate-100 sm:p-12">
     <div class="mx-auto max-w-3xl text-center">
       <h1 class="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
-        <%= type_emoji(@type) %> <%= type_name(@type) %> Directory
+        <%= ResourceType[@type].emoji %> <%= ResourceType[@type].name %> Directory
       </h1>
       <p class="mt-4 text-base text-slate-600 sm:text-lg">
-        <%= @entries.total_count %> <%= type_description(@type) %>
+        <%= @entries.total_count %> <%= ResourceType[@type].description %>
       </p>
 
       <%= form_with url: resource_type_path(@type), method: :get, local: true, class: "mt-8" do |form| %>
@@ -24,7 +24,7 @@
           <%= form.text_field :q,
             value: @query,
             class: "h-14 w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-4 text-base text-slate-900 placeholder:text-slate-400 shadow-inner focus:border-rose-400 focus:ring-2 focus:ring-rose-300 focus:outline-none",
-            placeholder: "Search #{type_name(@type).downcase}…" %>
+            placeholder: "Search #{ResourceType[@type].name.downcase}…" %>
         </div>
       <% end %>
 
