@@ -412,8 +412,6 @@ class AuthorProposal < ApplicationRecord
   # Normalizes resource_url and attempts to match with existing Entry
   # Stores original URL and sets matched_entry_id if found
   def normalize_and_match_resource_url
-    return if resource_url.blank?
-
     # Store original URL before normalization
     self.original_resource_url = resource_url.dup
 
@@ -427,8 +425,6 @@ class AuthorProposal < ApplicationRecord
   # Normalizes a URL for consistent matching
   # Handles: whitespace, http/https, trailing slashes, www prefix, case
   def normalize_url(url)
-    return nil if url.blank?
-
     normalized = url.strip.downcase
 
     # Normalize protocol to http://
@@ -446,8 +442,6 @@ class AuthorProposal < ApplicationRecord
   # Searches for matching Entry by normalized URL
   # Sets matched_entry_id if exact match found
   def match_entry_by_url
-    return if resource_url.blank?
-
     # Search all entries and normalize their URLs for comparison
     matched = Entry.find_by(
       "REPLACE(REPLACE(LOWER(TRIM(url)), 'https://', 'http://'), 'www.', '') = ?",

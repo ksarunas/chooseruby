@@ -131,8 +131,6 @@ class EntryDirectoryQuery
   #   '"web framework"' => '"web framework"'
   #   'rails "web framework"' => 'rails* "web framework"'
   def sanitize_fts_query(query_string)
-    return "" if query_string.blank?
-
     # Extract quoted phrases and their positions
     phrases = []
     query_without_phrases = query_string.gsub(/"([^"]*)"/) do |match|

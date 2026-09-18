@@ -300,7 +300,9 @@ class Entry < ApplicationRecord
   # We check saved changes on the rich_text_description association
   def description_was_changed?
     # If rich_text_description was saved in this transaction, it changed
-    rich_text_description&.previous_changes&.any? || false
+    return false if rich_text_description.nil?
+
+    rich_text_description.previous_changes.any?
   end
 
   # Sync entry data to FTS5 virtual table for full-text search

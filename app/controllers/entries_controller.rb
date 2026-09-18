@@ -242,7 +242,7 @@ class EntriesController < ApplicationController
 
     # Convert price from dollars to cents
     if all_permitted_params[:price].present?
-      params_hash[:price_cents] = (all_permitted_params[:price].to_f * 100).to_i
+      params_hash[:price_cents] = (all_permitted_params[:price].to_d * 100).to_i
     end
 
     params_hash

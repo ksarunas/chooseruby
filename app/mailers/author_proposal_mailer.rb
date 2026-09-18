@@ -42,8 +42,8 @@ class AuthorProposalMailer < ApplicationMailer
   # @return [Mail::Message] the email to be delivered
   def approval_notification(author_proposal)
     @proposal = author_proposal
-    # Eager load author to avoid strict loading violation
-    @author = author_proposal.author_id.present? ? Author.find(author_proposal.author_id) : nil
+    # Approval always assigns an author; load it explicitly to avoid strict loading violation
+    @author = Author.find(author_proposal.author_id)
 
     mail(
       to: @proposal.submitter_email,

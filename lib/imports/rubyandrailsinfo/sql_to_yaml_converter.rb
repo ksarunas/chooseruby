@@ -3,6 +3,18 @@
 module Imports
   module Rubyandrailsinfo
     class SqlToYamlConverter
+      # Entity-specific columns kept per table; entry columns are nested separately
+      ENTITY_FIELDS = {
+        "books" => %w[id isbn year page amazon_url website_url free featured created_at updated_at],
+        "courses" => %w[id free created_at updated_at],
+        "newsletters" => %w[id created_at updated_at],
+        "podcasts" => %w[id created_at updated_at],
+        "communities" => %w[id platform_type members created_at updated_at],
+        "youtubes" => %w[id created_at updated_at],
+        "screencasts" => %w[id created_at updated_at],
+        "lessons" => %w[id youtube_id created_at updated_at]
+      }.freeze
+
       def initialize(sql_file:, output_dir:)
         @sql_file = sql_file
         @output_dir = output_dir
@@ -81,75 +93,7 @@ module Imports
       end
 
       def extract_entity_fields(record, entity_table)
-        # Entity-specific fields based on table
-        case entity_table
-        when "books"
-          {
-            "id" => record["id"],
-            "isbn" => record["isbn"],
-            "year" => record["year"],
-            "page" => record["page"],
-            "amazon_url" => record["amazon_url"],
-            "website_url" => record["website_url"],
-            "free" => record["free"],
-            "featured" => record["featured"],
-            "created_at" => record["created_at"],
-            "updated_at" => record["updated_at"]
-          }
-        when "courses"
-          {
-            "id" => record["id"],
-            "free" => record["free"],
-            "created_at" => record["created_at"],
-            "updated_at" => record["updated_at"]
-          }
-        when "newsletters"
-          {
-            "id" => record["id"],
-            "created_at" => record["created_at"],
-            "updated_at" => record["updated_at"]
-          }
-        when "podcasts"
-          {
-            "id" => record["id"],
-            "created_at" => record["created_at"],
-            "updated_at" => record["updated_at"]
-          }
-        when "communities"
-          {
-            "id" => record["id"],
-            "platform_type" => record["platform_type"],
-            "members" => record["members"],
-            "created_at" => record["created_at"],
-            "updated_at" => record["updated_at"]
-          }
-        when "youtubes"
-          {
-            "id" => record["id"],
-            "created_at" => record["created_at"],
-            "updated_at" => record["updated_at"]
-          }
-        when "screencasts"
-          {
-            "id" => record["id"],
-            "created_at" => record["created_at"],
-            "updated_at" => record["updated_at"]
-          }
-        when "lessons"
-          {
-            "id" => record["id"],
-            "youtube_id" => record["youtube_id"],
-            "created_at" => record["created_at"],
-            "updated_at" => record["updated_at"]
-          }
-        else
-          # Default: include id and timestamps
-          {
-            "id" => record["id"],
-            "created_at" => record["created_at"],
-            "updated_at" => record["updated_at"]
-          }
-        end
+        record.slice(*ENTITY_FIELDS.fetch(entity_table))
       end
 
       def extract_entry_fields(record, entity_table)
@@ -161,13 +105,9 @@ module Imports
         }
 
         # Add appropriate URL field based on entity type
-        case entity_table
-        when "lessons"
+        if entity_table == "lessons"
           # Lessons use 'url' field instead of 'website_url'
           base_fields.merge("url" => record["url"])
-        when "youtubes"
-          # Youtubes use 'website_url'
-          base_fields.merge("website_url" => record["website_url"])
         else
           # All others use 'website_url'
           base_fields.merge("website_url" => record["website_url"])

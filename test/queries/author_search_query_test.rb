@@ -109,6 +109,12 @@ class AuthorSearchQueryTest < ActiveSupport::TestCase
     assert_not_includes results, @pending_author
   end
 
+  test "drops search words made only of special characters" do
+    results = AuthorSearchQuery.new({ q: "David -" }).call
+
+    assert_equal [ @author_dhh ], results.to_a
+  end
+
   test "sanitizes FTS5 special characters" do
     query = AuthorSearchQuery.new({ q: "David (test)" })
 

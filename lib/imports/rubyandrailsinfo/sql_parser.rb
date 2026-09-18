@@ -37,7 +37,6 @@ module Imports
       # Example: COPY "public"."authors" ("id", "name", "created_at") FROM stdin;
       def extract_column_names(copy_block)
         match = copy_block.match(/COPY "public"\."[^"]+" \(([^)]+)\) FROM stdin;/)
-        return [] unless match
 
         # Extract column names, remove quotes, trim whitespace
         match[1].scan(/"([^"]+)"/).flatten
@@ -49,11 +48,9 @@ module Imports
 
         # Find start (line after COPY statement)
         start_idx = lines.find_index { |line| line.match?(/FROM stdin;/) }
-        return [] unless start_idx
 
         # Find end (line with \.)
         end_idx = lines.find_index { |line| line == '\.' }
-        return [] unless end_idx
 
         # Extract data lines (between start and end)
         lines[(start_idx + 1)...end_idx]
@@ -63,7 +60,7 @@ module Imports
       def parse_data_lines(data_lines, columns)
         data_lines.map do |line|
           values = parse_line(line)
-          next nil if values.nil? || values.length != columns.length
+          next nil if values.length != columns.length
 
           # Create hash mapping column names to values
           Hash[columns.zip(values)]
@@ -82,7 +79,6 @@ module Imports
       # Convert a raw value from PostgreSQL COPY format
       def convert_value(raw_value)
         return nil if raw_value == '\N' # PostgreSQL NULL
-        return nil if raw_value.nil?
         return "" if raw_value.empty?
 
         # Unescape PostgreSQL escapes
