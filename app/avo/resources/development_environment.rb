@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Admin screens for the development environment details behind a directory entry.
 class Avo::Resources::DevelopmentEnvironment < Avo::BaseResource
   self.title = :display_name
   self.includes = [ :entry ]

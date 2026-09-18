@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Admin screens for the product details behind a directory entry.
 class Avo::Resources::Product < Avo::BaseResource
   self.title = :display_name
   self.includes = [ :entry ]

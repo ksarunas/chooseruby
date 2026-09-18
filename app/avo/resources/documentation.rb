@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Admin screens for the documentation details behind a directory entry.
 class Avo::Resources::Documentation < Avo::BaseResource
   self.title = :display_name
   self.includes = [ :entry ]

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Admin screens for the testing resource details behind a directory entry.
 class Avo::Resources::TestingResource < Avo::BaseResource
   self.title = :display_name
   self.includes = [ :entry ]

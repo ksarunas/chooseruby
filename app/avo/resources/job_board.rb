@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Admin screens for the job board details behind a directory entry.
 class Avo::Resources::JobBoard < Avo::BaseResource
   self.title = :display_name
   self.includes = [ :entry ]

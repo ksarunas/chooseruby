@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Admin screens for the video details behind a directory entry.
 class Avo::Resources::Video < Avo::BaseResource
   self.title = :display_name
   self.includes = [ :entry ]
