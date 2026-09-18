@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Suspending a user and asking whether they are currently suspended.
 module User::Bannable
   extend ActiveSupport::Concern
 

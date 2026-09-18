@@ -116,16 +116,21 @@ class Author < ApplicationRecord
   # Generate URL-friendly slug from name
   # Ensures uniqueness by appending number if needed
   def generate_slug
-    base_slug = name.parameterize
+    self.slug = unique_slug(name.parameterize)
+  end
+
+  # Appends a counter until the slug is free, so two records never collide.
+  def unique_slug(base_slug)
     candidate_slug = base_slug
-    counter = 1
+    counter = 0
 
-    while Author.where(slug: candidate_slug).where.not(id: id).exists?
-      candidate_slug = "#{base_slug}-#{counter}"
-      counter += 1
-    end
+    candidate_slug = "#{base_slug}-#{counter += 1}" while slug_taken?(candidate_slug)
 
-    self.slug = candidate_slug
+    candidate_slug
+  end
+
+  def slug_taken?(candidate_slug)
+    Author.where(slug: candidate_slug).where.not(id: id).exists?
   end
 
   # Fetch GitHub avatar URL when github_url changes
@@ -144,31 +149,15 @@ class Author < ApplicationRecord
     name_text = name.to_s
 
     # Delete existing FTS row first (FTS5 tables don't support proper upserts)
-    ActiveRecord::Base.connection.execute(
-      ActiveRecord::Base.sanitize_sql_array([
-        "DELETE FROM authors_fts WHERE author_id = ?",
-        id
-      ])
-    )
+    Author.execute_fts_sql("DELETE FROM authors_fts WHERE author_id = ?", id)
 
     # Insert new FTS row
-    ActiveRecord::Base.connection.execute(
-      ActiveRecord::Base.sanitize_sql_array([
-        "INSERT INTO authors_fts (author_id, name) VALUES (?, ?)",
-        id,
-        name_text
-      ])
-    )
+    Author.execute_fts_sql("INSERT INTO authors_fts (author_id, name) VALUES (?, ?)", id, name_text)
   end
 
   # Remove author from FTS5 virtual table
   # Called after destroy
   def remove_from_fts
-    ActiveRecord::Base.connection.execute(
-      ActiveRecord::Base.sanitize_sql_array([
-        "DELETE FROM authors_fts WHERE author_id = ?",
-        id
-      ])
-    )
+    Author.execute_fts_sql("DELETE FROM authors_fts WHERE author_id = ?", id)
   end
 end

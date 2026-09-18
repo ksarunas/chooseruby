@@ -158,38 +158,7 @@ class AuthorProposal < ApplicationRecord
   #   proposal.approved? # => true
   #   proposal.author.reload.bio # => "Updated bio text"
   def approve!
-    ActiveRecord::Base.transaction do
-      # Eager load author to avoid strict loading violations
-      existing_author = author_id.present? ? Author.find(author_id) : nil
-      target_author = existing_author || create_new_author!
-
-      # Apply bio changes if present (note: Author does not have description field)
-      target_author.bio = bio_text if bio_text.present?
-
-      # Apply link_updates to author
-      apply_link_updates_to_author(target_author) if link_updates.present?
-
-      # Save author with validations
-      target_author.save!
-
-      # Update proposal's author_id if this was a new author
-      self.author_id = target_author.id if author_id.nil?
-
-      # Create EntriesAuthor association if matched entry exists
-      create_entries_author_association(target_author) if matched_entry_id.present?
-
-      # Mark proposal as approved
-      update!(
-        status: :approved,
-        reviewed_at: Time.current,
-        reviewer_id: nil  # Will be populated when admin system exists
-      )
-
-      # Send approval email - reload with author association to avoid strict loading violation
-      send_approval_email
-    end
-
-    true
+    Approval.new(self).call
   end
 
   # Rejects the proposal without applying any changes
@@ -232,7 +201,7 @@ class AuthorProposal < ApplicationRecord
   #
   # @return [Boolean] true when author_id is nil
   def new_author_proposal?
-    author_id.nil?
+    author_id.blank?
   end
 
   # Returns true if this is a proposal to edit an existing author
@@ -284,14 +253,6 @@ class AuthorProposal < ApplicationRecord
     AuthorProposalMailer.submission_confirmation(self).deliver_later
   end
 
-  # Sends approval notification email after proposal is approved
-  # Delivers email asynchronously using deliver_later
-  # Creates a plain hash with proposal data to avoid strict loading issues
-  def send_approval_email
-    # Pass self directly - mailer will handle accessing the association
-    AuthorProposalMailer.approval_notification(self).deliver_later
-  end
-
   # Sends rejection notification email after proposal is rejected
   # Delivers email asynchronously using deliver_later
   # Creates a plain hash with proposal data to avoid strict loading issues
@@ -303,51 +264,6 @@ class AuthorProposal < ApplicationRecord
   # ========================================
   # Private Helper Methods - Approval Workflow
   # ========================================
-
-  # Creates a new Author from proposal data
-  #
-  # @return [Author] newly created author instance (unsaved)
-  # @raise [ActiveRecord::RecordInvalid] if author validation fails
-  def create_new_author!
-    new_author = Author.new(name: author_name)
-    new_author
-  end
-
-  # Applies link_updates hash to author's link fields
-  #
-  # Only updates fields that are present in the link_updates hash.
-  # Validates that all link fields are valid Author attributes.
-  #
-  # @param target_author [Author] the author to update
-  # @return [void]
-  def apply_link_updates_to_author(target_author)
-    link_updates.each do |field_name, url_value|
-      next if url_value.blank?
-
-      # Validate field exists on Author model
-      unless target_author.respond_to?("#{field_name}=")
-        raise ArgumentError, "Invalid link field: #{field_name}"
-      end
-
-      target_author.send("#{field_name}=", url_value)
-    end
-  end
-
-  # Creates EntriesAuthor association between author and matched entry
-  #
-  # Only creates association if it doesn't already exist.
-  # Silently skips if association already exists to maintain idempotency.
-  #
-  # @param target_author [Author] the author to associate with entry
-  # @return [void]
-  def create_entries_author_association(target_author)
-    return if EntriesAuthor.exists?(author: target_author, entry_id: matched_entry_id)
-
-    EntriesAuthor.create!(
-      author: target_author,
-      entry_id: matched_entry_id
-    )
-  end
 
   # ========================================
   # Private Helper Methods - Validations
@@ -370,28 +286,12 @@ class AuthorProposal < ApplicationRecord
   def validate_link_urls
     return if link_updates.blank?
 
-    valid_link_fields = %w[
-      github_url gitlab_url website_url bluesky_url ruby_social_url
-      twitter_url linkedin_url youtube_url twitch_url blog_url
-    ]
-
-    link_updates.each do |field_name, url|
-      next if url.blank?
-
-      unless valid_link_fields.include?(field_name)
-        errors.add(:link_updates, "#{field_name} is not a valid link field")
-        next
-      end
-
-      unless url.match?(URI::DEFAULT_PARSER.make_regexp(%w[http https]))
-        errors.add(:link_updates, "#{field_name} must be a valid URL starting with http:// or https://")
-      end
-    end
+    ProposedLinks.new(link_updates).errors.each { |message| errors.add(:link_updates, message) }
   end
 
   # Prevents duplicate pending proposals for same author by same email within 24 hours
   def prevent_duplicate_pending_proposals
-    return if author_id.nil?  # Skip for new author proposals
+    return if author_id.blank? # Skip for new author proposals
     return unless status == "pending"
 
     duplicate = AuthorProposal
@@ -412,42 +312,10 @@ class AuthorProposal < ApplicationRecord
   # Normalizes resource_url and attempts to match with existing Entry
   # Stores original URL and sets matched_entry_id if found
   def normalize_and_match_resource_url
-    # Store original URL before normalization
+    submitted_url = ResourceUrl.new(resource_url)
+
     self.original_resource_url = resource_url.dup
-
-    # Normalize the URL
-    self.resource_url = normalize_url(resource_url)
-
-    # Attempt to match with existing entries
-    match_entry_by_url
-  end
-
-  # Normalizes a URL for consistent matching
-  # Handles: whitespace, http/https, trailing slashes, www prefix, case
-  def normalize_url(url)
-    normalized = url.strip.downcase
-
-    # Normalize protocol to http://
-    normalized = normalized.sub(/\Ahttps:\/\//, "http://")
-
-    # Remove www prefix
-    normalized = normalized.sub(/\Ahttp:\/\/www\./, "http://")
-
-    # Remove trailing slash
-    normalized = normalized.sub(/\/\z/, "")
-
-    normalized
-  end
-
-  # Searches for matching Entry by normalized URL
-  # Sets matched_entry_id if exact match found
-  def match_entry_by_url
-    # Search all entries and normalize their URLs for comparison
-    matched = Entry.find_by(
-      "REPLACE(REPLACE(LOWER(TRIM(url)), 'https://', 'http://'), 'www.', '') = ?",
-      resource_url.sub(/\/$/, "")
-    )
-
-    self.matched_entry_id = matched&.id
+    self.resource_url = submitted_url.to_s
+    self.matched_entry_id = submitted_url.matching_entry&.id
   end
 end
