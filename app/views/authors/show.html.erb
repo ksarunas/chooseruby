@@ -33,25 +33,14 @@
       <% end %>
     </div>
 
-    <!-- Social Links -->
-    <% social_links = [
-      { name: 'GitHub', url: @author.github_url, icon: '⚡' },
-      { name: 'GitLab', url: @author.gitlab_url, icon: '🦊' },
-      { name: 'Website', url: @author.website_url, icon: '🌐' },
-      { name: 'Bluesky', url: @author.bluesky_url, icon: '☁️' },
-      { name: 'Ruby.social', url: @author.ruby_social_url, icon: '💎' },
-      { name: 'Twitter', url: @author.twitter_url, icon: '🐦' },
-      { name: 'LinkedIn', url: @author.linkedin_url, icon: '💼' },
-      { name: 'YouTube', url: @author.youtube_url, icon: '📺' },
-      { name: 'Twitch', url: @author.twitch_url, icon: '🎮' },
-      { name: 'Blog', url: @author.blog_url, icon: '✍️' }
-    ].select { |link| link[:url].present? } %>
-
+    <% social_links = @author.social_links %>
     <% if social_links.any? %>
       <div class="flex flex-wrap justify-center gap-3 mt-6">
         <% social_links.each do |link| %>
           <%= link_to link[:url], target: "_blank", rel: "noopener", class: "inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200 text-gray-700 hover:text-gray-900" do %>
-            <span class="text-xl"><%= link[:icon] %></span>
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="<%= link[:icon_path] %>"/>
+            </svg>
             <span class="text-sm font-medium"><%= link[:name] %></span>
           <% end %>
         <% end %>

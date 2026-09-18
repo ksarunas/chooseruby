@@ -115,7 +115,7 @@ class FtsReindexerTest < ActiveSupport::TestCase
     end
 
     # Reindex with small batch size
-    FtsReindexer.new.reindex_entries(batch_size: 2)
+    FtsReindexer.new(batch_size: 2).reindex_entries
 
     # Verify all entries are indexed
     count = ActiveRecord::Base.connection.execute("SELECT COUNT(*) FROM entries_fts").first["COUNT(*)"]

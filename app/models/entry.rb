@@ -78,6 +78,8 @@
 #  index_entries_on_title                            (title)
 #
 class Entry < ApplicationRecord
+  include UniqueSlug
+
   # DelegatedType - polymorphic association to type-specific models
   # Task 2.2: Updated to include all 19 types (8 existing + 11 new)
   delegated_type :entryable, types: %w[
@@ -317,20 +319,6 @@ class Entry < ApplicationRecord
   # Ensures uniqueness by appending number if needed
   def generate_slug
     self.slug = unique_slug(title.parameterize)
-  end
-
-  # Appends a counter until the slug is free, so two records never collide.
-  def unique_slug(base_slug)
-    candidate_slug = base_slug
-    counter = 0
-
-    candidate_slug = "#{base_slug}-#{counter += 1}" while slug_taken?(candidate_slug)
-
-    candidate_slug
-  end
-
-  def slug_taken?(candidate_slug)
-    Entry.where(slug: candidate_slug).where.not(id: id).exists?
   end
 
   # Determine if FTS sync should be triggered

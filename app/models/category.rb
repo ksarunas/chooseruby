@@ -41,6 +41,8 @@
 #  index_categories_on_slug  (slug) UNIQUE
 #
 class Category < ApplicationRecord
+  include UniqueSlug
+
   # Associations
   has_many :categories_entries, dependent: :destroy
   has_many :entries, through: :categories_entries
@@ -99,19 +101,5 @@ class Category < ApplicationRecord
   # Ensures uniqueness by appending number if needed
   def generate_slug
     self.slug = unique_slug(name.parameterize)
-  end
-
-  # Appends a counter until the slug is free, so two records never collide.
-  def unique_slug(base_slug)
-    candidate_slug = base_slug
-    counter = 0
-
-    candidate_slug = "#{base_slug}-#{counter += 1}" while slug_taken?(candidate_slug)
-
-    candidate_slug
-  end
-
-  def slug_taken?(candidate_slug)
-    Category.where(slug: candidate_slug).where.not(id: id).exists?
   end
 end

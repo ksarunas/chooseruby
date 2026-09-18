@@ -12,6 +12,7 @@ class AuthorProposal::Approval
 
   def call
     ActiveRecord::Base.transaction { apply }
+    AuthorProposalMailer.approval_notification(proposal).deliver_later
 
     true
   end
@@ -26,7 +27,6 @@ class AuthorProposal::Approval
     proposal.author_id = author.id if proposal.author_id.blank?
     link_to_matched_entry(author)
     proposal.update!(status: :approved, reviewed_at: Time.current, reviewer_id: nil)
-    AuthorProposalMailer.approval_notification(proposal).deliver_later
   end
 
   # The author the proposal concerns, with the proposed changes saved onto it.

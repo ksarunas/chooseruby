@@ -50,67 +50,56 @@ class ResourceType
       emoji: "👥",
       description: "curated communities to connect with Rubyists"
     },
-    # Task 3.2: Newsletter metadata
     "newsletters" => {
       name: "Newsletters",
       emoji: "📧",
       description: "curated newsletters for Ruby developers"
     },
-    # Task 3.3: Blog metadata
     "blogs" => {
       name: "Blogs",
       emoji: "📝",
       description: "curated blogs for Ruby developers"
     },
-    # Task 3.4: Video metadata
     "videos" => {
       name: "Videos",
       emoji: "🎥",
       description: "curated videos for Ruby developers"
     },
-    # Task 3.5: Channel metadata
     "channels" => {
       name: "Channels",
       emoji: "📺",
       description: "curated channels for Ruby developers"
     },
-    # Task 3.6: Documentation metadata
     "documentations" => {
       name: "Documentation",
       emoji: "📚",
       description: "curated documentation for Ruby developers"
     },
-    # Task 3.7: TestingResource metadata
     "testing-resources" => {
       name: "Testing Resources",
       emoji: "🧪",
       description: "curated testing resources for Ruby developers"
     },
-    # Task 3.8: DevelopmentEnvironment metadata
     "development-environments" => {
       name: "Development Environments",
       emoji: "💻",
       description: "curated development environments for Ruby developers"
     },
-    # Task 3.9: JobBoard metadata
     "job-boards" => {
       name: "Job Boards",
       emoji: "💼",
       description: "curated job boards for Ruby developers"
     },
-    # Task 3.10: Framework metadata
     "frameworks" => {
       name: "Frameworks",
       emoji: "🏗️",
       description: "curated frameworks for Ruby developers"
     },
-    # Task 3.11: Directory metadata
     "directories" => {
       name: "Directories",
       emoji: "📂",
       description: "curated directories for Ruby developers"
     },
-    # Task 3.12: Product metadata
     "products" => {
       name: "Products",
       emoji: "🚀",

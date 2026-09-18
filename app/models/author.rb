@@ -50,6 +50,8 @@
 #  index_authors_on_status  (status)
 #
 class Author < ApplicationRecord
+  include UniqueSlug
+
   # The social profiles an author can publish, in the order they are shown:
   # the attribute holding the URL, the label, and the SVG path for the icon.
   SOCIAL_PROFILES = [
@@ -117,20 +119,6 @@ class Author < ApplicationRecord
   # Ensures uniqueness by appending number if needed
   def generate_slug
     self.slug = unique_slug(name.parameterize)
-  end
-
-  # Appends a counter until the slug is free, so two records never collide.
-  def unique_slug(base_slug)
-    candidate_slug = base_slug
-    counter = 0
-
-    candidate_slug = "#{base_slug}-#{counter += 1}" while slug_taken?(candidate_slug)
-
-    candidate_slug
-  end
-
-  def slug_taken?(candidate_slug)
-    Author.where(slug: candidate_slug).where.not(id: id).exists?
   end
 
   # Fetch GitHub avatar URL when github_url changes

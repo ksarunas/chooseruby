@@ -53,10 +53,7 @@ class Entry::RelatedResources
   end
 
   def suggestions_in(categories, room)
-    Entry
-      .strict_loading
-      .visible
-      .includes(:categories, :rich_text_description, :entryable, { image_attachment: :blob }, authors: { avatar_attachment: :blob })
+    Entry.visible.with_card_includes
       .joins(:categories_entries)
       .where(categories_entries: { category_id: categories })
       .where.not(id: @seen_ids)

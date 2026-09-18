@@ -36,27 +36,14 @@ class GithubAvatarService
   def call
     username = extract_username
     username && "https://github.com/#{username}.png"
-  rescue => error
-    log_failure(error)
   end
 
   private
 
-  # Extract username from various GitHub URL formats
   def extract_username
     return nil if @github_url.blank?
 
-    # Match patterns like:
-    # https://github.com/username
-    # https://github.com/username/
-    # http://github.com/username
     match = @github_url.match(%r{github\.com/([^/]+)/?$})
     match[1] if match
-  end
-
-  # Report a failed lookup and fall back to no avatar
-  def log_failure(error)
-    Rails.logger.warn("GitHub avatar fetch failed for #{@github_url}: #{error.message}")
-    nil
   end
 end

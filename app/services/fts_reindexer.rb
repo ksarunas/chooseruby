@@ -2,9 +2,7 @@
 
 # Rebuilds the SQLite FTS5 index for entries and authors.
 #
-# Reindexing is a maintenance operation driven by the fts:* rake tasks. Each
-# reindexer is configured with the batch size used to page through records, and
-# individual calls may override it.
+# Reindexing is a maintenance operation driven by the fts:* rake tasks.
 class FtsReindexer
   DEFAULT_BATCH_SIZE = 1000
 
@@ -17,14 +15,14 @@ class FtsReindexer
     reindex_authors
   end
 
-  def reindex_entries(batch_size: @batch_size)
-    Entry.find_each(batch_size: batch_size) do |entry|
+  def reindex_entries
+    Entry.find_each(batch_size: @batch_size) do |entry|
       entry.send(:sync_to_fts)
     end
   end
 
-  def reindex_authors(batch_size: @batch_size)
-    Author.find_each(batch_size: batch_size) do |author|
+  def reindex_authors
+    Author.find_each(batch_size: @batch_size) do |author|
       author.send(:sync_to_fts)
     end
   end
