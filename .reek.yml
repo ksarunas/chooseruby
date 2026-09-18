@@ -8,3 +8,21 @@ exclude_paths:
   - storage
   - tmp
   - vendor
+
+directories:
+  # A Rails action's job is to assign the values its template renders, and these
+  # pages legitimately render more than four. Every controller here was checked
+  # for instance variables no view reads, and those were removed. Getting under
+  # the limit would mean wrapping each page's data in a presenter that exists
+  # only to satisfy the count.
+  "app/controllers":
+    TooManyInstanceVariables:
+      enabled: false
+
+detectors:
+  MissingSafeMethod:
+    exclude:
+      # AuthorProposal#approve! and #reject! raise when they fail, which is what
+      # the bang is for. A non-bang counterpart would be unused code, and the
+      # admin actions that call them rely on rescuing the error to report it.
+      - AuthorProposal
